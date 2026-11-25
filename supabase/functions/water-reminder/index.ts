@@ -1,6 +1,6 @@
-// Supabase Edge Function: water-reminder
-// Wird stündlich per pg_cron aufgerufen. Um 11, 14, 17 und 20 Uhr (Europe/Berlin)
-// prüft sie, ob genug Wasser getrunken wurde, und schickt sonst eine Push-Mitteilung.
+// Supabase Edge Function: water-reminder (verschickt alle Gymlog-Erinnerungen)
+// Wird alle 15 Minuten per pg_cron aufgerufen und prüft für jedes Konto,
+// welche Erinnerungen in diesem 15-Minuten-Fenster fällig sind (Zeitzone Europe/Berlin).
 //
 // Benötigte Secrets: VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, CRON_SECRET (optional VAPID_CONTACT)
 // "Verify JWT" für diese Funktion ausschalten – geschützt wird sie über den Header x-cron-secret.
@@ -15,73 +15,124 @@ webpush.setVapidDetails(
   Deno.env.get("VAPID_PRIVATE_KEY")!,
 );
 
-// Uhrzeit -> Anteil des Tagesziels, der bis dann getrunken sein sollte
-const CHECKS: Record<number, number> = { 11: 0.3, 14: 0.5, 17: 0.7, 20: 0.85 };
+type Msg = { title: string; body: string; tag: string; url?: string };
+// deno-lint-ignore no-explicit-any
+type Any = any;
+
+const WATER_CHECKS: Record<number, number> = { 11: 0.3, 14: 0.5, 17: 0.7, 20: 0.85 };
 const WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const ORDER = ["push", "pull", "legs"];
+const LBL: Record<string, string> = { push: "Push", pull: "Pull", legs: "Legs" };
+const RDEF: Any = {
+  train: { on: true, lead: 30 }, missed: { on: false, time: "21:00" }, water: { on: true },
+  prep: { on: false, days: [0, 3], time: "17:00" }, weekly: { on: true, day: 0, time: "19:00" }, custom: [],
+};
 const liter = (ml: number) => (ml / 1000).toLocaleString("de-DE", { maximumFractionDigits: 2 });
+const toMin = (t: string) => {
+  const [h, m] = String(t ?? "").split(":").map(Number);
+  return Number.isFinite(h) ? h * 60 + (Number.isFinite(m) ? m : 0) : NaN;
+};
+
+function berlinNow() {
+  const p = Object.fromEntries(
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: "Europe/Berlin", year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", hourCycle: "h23", weekday: "short",
+    }).formatToParts(new Date()).map((x) => [x.type, x.value]),
+  );
+  const y = +p.year, mo = +p.month, d = +p.day, h = +p.hour, mi = +p.minute;
+  const dow = WD.indexOf(p.weekday);
+  const iso = (dt: Date) => dt.toISOString().slice(0, 10);
+  const monday = new Date(Date.UTC(y, mo - 1, d - ((dow + 6) % 7)));
+  return { today: `${p.year}-${p.month}-${p.day}`, h, mi, dow, monday: iso(monday) };
+}
+
+function remindersFor(data: Any, now: ReturnType<typeof berlinNow>): Msg[] {
+  const s = data?.settings ?? {}, r = { ...RDEF, ...(s.rem ?? {}) };
+  const slot = now.h * 60 + now.mi - (now.mi % 15);
+  const due = (min: number) => min >= slot && min < slot + 15;
+  const days: number[] = s.days ?? [1, 3, 5];
+  const workouts: Any[] = data?.workouts ?? [];
+  const trainDay = days.includes(now.dow);
+  const doneToday = workouts.some((w) => w.date === now.today);
+  const last = [...workouts].sort((a, b) => b.date.localeCompare(a.date) || String(b.id).localeCompare(String(a.id)))[0];
+  const next = last ? ORDER[(ORDER.indexOf(last.type) + 1) % 3] : "push";
+  const out: Msg[] = [];
+
+  if (r.train?.on && trainDay && !doneToday && due(toMin(s.time ?? "18:00") - (+r.train.lead || 30))) {
+    out.push({ tag: "train", title: `Gleich Gym: ${LBL[next]}-Tag`, body: `Training um ${s.time ?? "18:00"} Uhr. Dein Plan wartet in der App – viel Erfolg!`, url: "./#uebersicht" });
+  }
+  if (r.missed?.on && trainDay && !doneToday && due(toMin(r.missed.time))) {
+    out.push({ tag: "missed", title: "Training eingetragen?", body: `Heute ist ${LBL[next]}-Tag und noch nichts eingetragen. Trag es ein, solange du die Gewichte noch weißt.`, url: "./#training" });
+  }
+  const share = WATER_CHECKS[now.h];
+  if (r.water?.on !== false && share !== undefined && now.mi < 15) {
+    const ml = Number((data?.water ?? {})[now.today] ?? 0);
+    const train = trainDay || doneToday;
+    const goal = Number(s.waterCustom) > 0 ? Math.round(Number(s.waterCustom) * 1000)
+      : Math.round(((Number(s.weight) || 75) * 35 + (train ? 500 : 0)) / 250) * 250;
+    if (ml < goal * share) out.push({ tag: "water", title: "Trink etwas Wasser", body: `Erst ${liter(ml)} l von ${liter(goal)} l heute. Zeit für ein Glas!`, url: "./#essen" });
+  }
+  if (r.prep?.on && (r.prep.days ?? []).includes(now.dow) && due(toMin(r.prep.time))) {
+    out.push({ tag: "prep", title: "Mealprep-Zeit", body: "Zeit fürs Vorkochen – Rezepte und Einkaufsliste findest du in der App.", url: "./#essen" });
+  }
+  if (r.weekly?.on && now.dow === (+r.weekly.day || 0) && due(toMin(r.weekly.time))) {
+    const ws = workouts.filter((w) => w.date >= now.monday && w.date <= now.today);
+    const sets = ws.reduce((a, w) => a + (w.sets ?? []).filter((x: Any) => +x.r > 0).length, 0);
+    const kg = ws.reduce((a, w) => a + (w.sets ?? []).reduce((b: number, x: Any) => b + (+x.w || 0) * (+x.r || 0), 0), 0);
+    const goal = days.length || 3;
+    out.push({
+      tag: "weekly", title: "Dein Wochenrückblick",
+      body: `${ws.length} von ${goal} Training${goal === 1 ? "" : "s"} · ${sets} ${sets === 1 ? "Satz" : "Sätze"} · ${Math.round(kg).toLocaleString("de-DE")} kg bewegt. ${ws.length >= goal ? "Starke Woche!" : "Nächste Woche packst du es!"}`,
+      url: "./#uebersicht",
+    });
+  }
+  for (const c of r.custom ?? []) {
+    if ((c.days ?? []).includes(now.dow) && due(toMin(c.time))) {
+      out.push({ tag: "c" + c.id, title: "Gymlog", body: String(c.text ?? "").slice(0, 120), url: "./#uebersicht" });
+    }
+  }
+  return out;
+}
 
 Deno.serve(async (req) => {
   const expected = (Deno.env.get("CRON_SECRET") ?? "").trim();
   const got = (req.headers.get("x-cron-secret") ?? "").trim();
   if (!expected || got !== expected) {
-    // Diagnose ohne das Passwort selbst zu verraten
-    const info = {
-      secret_in_supabase_gesetzt: expected.length > 0,
-      laenge_secret: expected.length,
-      header_mitgeschickt: got.length > 0,
-      laenge_header: got.length,
-      gleicher_anfang: expected.length > 2 && got.slice(0, 2) === expected.slice(0, 2),
-    };
+    const info = { secret_in_supabase_gesetzt: expected.length > 0, laenge_secret: expected.length, header_mitgeschickt: got.length > 0, laenge_header: got.length };
     console.log("forbidden", JSON.stringify(info));
     return Response.json({ error: "forbidden", ...info }, { status: 403 });
   }
   const test = new URL(req.url).searchParams.get("test") === "1";
-
-  const p = Object.fromEntries(
-    new Intl.DateTimeFormat("en-US", {
-      timeZone: "Europe/Berlin", year: "numeric", month: "2-digit", day: "2-digit",
-      hour: "2-digit", hourCycle: "h23", weekday: "short",
-    }).formatToParts(new Date()).map((x) => [x.type, x.value]),
-  );
-  const today = `${p.year}-${p.month}-${p.day}`;
-  const hour = Number(p.hour);
-  const share = CHECKS[hour];
-  if (share === undefined && !test) return Response.json({ skipped: true, hour });
+  const now = berlinNow();
 
   const db = createClient(SB_URL, SB_KEY, { auth: { persistSession: false } });
   const { data: subs, error } = await db.from("push_subs").select("endpoint,user_id,sub");
   if (error) return Response.json({ error: error.message }, { status: 500 });
-  if (!subs?.length) return Response.json({ hour, sent: 0, note: "keine Abos" });
+  if (!subs?.length) return Response.json({ time: `${now.h}:${now.mi}`, sent: 0, note: "keine Abos" });
 
   const ids = [...new Set(subs.map((s) => s.user_id))];
   const { data: states, error: e2 } = await db.from("gymlog_state").select("user_id,data").in("user_id", ids);
   if (e2) return Response.json({ error: e2.message }, { status: 500 });
 
   let sent = 0;
+  const tags: string[] = [];
   for (const st of states ?? []) {
-    const d = st.data ?? {}, s = d.settings ?? {};
-    const ml = Number((d.water ?? {})[today] ?? 0);
-    const train = (s.days ?? []).includes(WD.indexOf(p.weekday)) ||
-      (d.workouts ?? []).some((w: { date: string }) => w.date === today);
-    const goal = Number(s.waterCustom) > 0
-      ? Math.round(Number(s.waterCustom) * 1000)
-      : Math.round(((Number(s.weight) || 75) * 35 + (train ? 500 : 0)) / 250) * 250;
-    if (!test && ml >= goal * share) continue;
-
-    const payload = JSON.stringify({
-      title: test ? "Test: Wasser-Erinnerung" : "Trink etwas Wasser",
-      body: `Erst ${liter(ml)} l von ${liter(goal)} l heute. Zeit für ein Glas!`,
-      tag: "water", url: "./#essen",
-    });
-    for (const sub of subs.filter((x) => x.user_id === st.user_id)) {
-      try {
-        await webpush.sendNotification(sub.sub, payload, { TTL: 3600 });
-        sent++;
-      } catch (e) {
-        const code = (e as { statusCode?: number }).statusCode;
-        if (code === 404 || code === 410) await db.from("push_subs").delete().eq("endpoint", sub.endpoint);
+    const msgs = test
+      ? [{ tag: "test", title: "Test: Gymlog", body: "Push-Mitteilungen funktionieren ✓", url: "./#plan" }]
+      : remindersFor(st.data, now);
+    for (const m of msgs) {
+      tags.push(m.tag);
+      for (const sub of subs.filter((x) => x.user_id === st.user_id)) {
+        try {
+          await webpush.sendNotification(sub.sub, JSON.stringify(m), { TTL: 1800 });
+          sent++;
+        } catch (e) {
+          const code = (e as { statusCode?: number }).statusCode;
+          if (code === 404 || code === 410) await db.from("push_subs").delete().eq("endpoint", sub.endpoint);
+        }
       }
     }
   }
-  return Response.json({ hour, sent });
+  return Response.json({ time: `${now.h}:${String(now.mi).padStart(2, "0")}`, sent, tags });
 });
