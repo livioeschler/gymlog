@@ -4,14 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Gymlog – Push Pull Legs</title>
-<meta name="theme-color" content="#d4241c">
+<meta name="theme-color" content="#e3e1db" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#232528" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Gymlog">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -22,28 +23,29 @@ PICTURE: die Wochen-Balken pro Muskelgruppe mit Zielbereich, gleich oben.
 COLOUR and TYPE: Kreideweiß/Gummiboden-Anthrazit, Scheiben-Rot als Band, Scheiben-Blau als Daten; Barlow Condensed + Barlow.
 LAYOUT: rotes Kopfband mit Wochenstand, Tabs, darunter eine ruhige Spalte bzw. zwei Spalten ab 900px.
 */
-:root{color-scheme:light dark;--bg:light-dark(#f3f2ee,#121315);--ink:light-dark(#15171a,#ecebe6);--mut:light-dark(#5b5f66,#9da1a8);--line:light-dark(#dcdad3,#2b2d31);--card:light-dark(#fff,#1b1d20);--red:light-dark(#d4241c,#c9231b);--blue:light-dark(#1f5fbf,#5b9bff);--zone:light-dark(#dfe8f6,#1d2a3d);--soft:light-dark(#ecebe6,#232529)}
+:root{color-scheme:light dark;--bg:light-dark(#f4f4f2,#161718);--ink:light-dark(#2a2c2e,#e6e5e1);--mut:light-dark(#666a6e,#9a9ea3);--line:light-dark(#dedcd6,#2c2e31);--card:light-dark(#fff,#1e2022);--head:light-dark(#e3e1db,#232528);--hink:light-dark(#2a2c2e,#e6e5e1);--acc:light-dark(#5f6b73,#a3b0b8);--on:light-dark(#fff,#161718);--blue:light-dark(#6f8190,#8fa5b3);--zone:light-dark(#d9e0e5,#28323a);--soft:light-dark(#ecebe7,#25272a)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
 html{overflow-x:clip}
+a{color:var(--acc)}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Barlow,system-ui,sans-serif;overflow-x:clip}
 h1,h2,h3{font-family:"Barlow Condensed",Barlow,sans-serif;font-weight:700;line-height:1.05;margin:0;text-wrap:balance}
 h2{font-size:32px;margin-bottom:14px}h3{font-size:22px}
 .band{padding:clamp(22px,4vw,48px) max(5vw,16px)}
 .wrap{max-width:1180px;margin:0 auto}
-header{background:var(--red);color:#fff;padding-top:max(clamp(22px,4vw,48px),env(safe-area-inset-top))}
+header{background:var(--head);color:var(--hink);padding-top:max(clamp(22px,4vw,48px),env(safe-area-inset-top))}
 main{padding-bottom:max(48px,env(safe-area-inset-bottom))}
 header .wrap{display:flex;flex-wrap:wrap;gap:18px 40px;align-items:flex-end;justify-content:space-between}
 header h1{font-size:clamp(40px,6vw,52px);letter-spacing:.5px}
 header p{margin:4px 0 0;opacity:.9}
 .wk{display:flex;gap:10px;align-items:center}
-.plate{width:46px;height:46px;border-radius:50%;border:3px solid rgba(255,255,255,.85);display:grid;place-items:center;font:700 18px "Barlow Condensed",sans-serif}
-.plate.on{background:#fff;color:var(--red)}
+.plate{width:46px;height:46px;border-radius:50%;border:3px solid currentColor;opacity:.9;display:grid;place-items:center;font:700 18px "Barlow Condensed",sans-serif}
+.plate.on{background:var(--hink);color:var(--head);border-color:var(--hink)}
 .wk span{font-size:14px;opacity:.9;max-width:9em;line-height:1.25}
 nav{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
 nav .wrap{display:flex;overflow-x:auto;scrollbar-width:none;gap:4px;padding:0 max(5vw,16px)}
 nav a{flex:none;padding:13px 14px;color:var(--mut);text-decoration:none;font-weight:600;border-bottom:3px solid transparent}
-nav a.on{color:var(--ink);border-color:var(--red)}
+nav a.on{color:var(--ink);border-color:var(--acc)}
 section{display:none}section.on{display:block}
 .grid{display:grid;gap:22px;grid-template-columns:minmax(0,1fr)}
 @media(min-width:900px){.grid.two{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}}
@@ -54,14 +56,14 @@ section{display:none}section.on{display:block}
 .track{position:relative;height:22px;background:var(--soft);border-radius:6px;overflow:hidden}
 .zone{position:absolute;inset:0 auto 0 41.67%;width:41.67%;background:var(--zone)}
 .fill{position:absolute;inset:0 auto 0 0;background:var(--blue);border-radius:6px;transition:width .5s}
-.fill.low{background:color-mix(in srgb,var(--blue) 45%,transparent)}
-.pm{position:absolute;top:-2px;bottom:-2px;width:3px;margin-left:-1px;background:var(--red)}
+.fill.low{background:color-mix(in srgb,var(--blue) 70%,var(--soft))}
+.pm{position:absolute;top:-2px;bottom:-2px;width:3px;margin-left:-1px;background:var(--acc)}
 .legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--mut);margin-top:10px}
 .legend i{display:inline-block;width:14px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:5px}
 .weeknav{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
 .weeknav strong{flex:1;font-size:17px}
 button,.btn{font:600 16px Barlow,sans-serif;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
-button.pri{background:var(--red);border-color:var(--red);color:#fff}
+button.pri{background:var(--acc);border-color:var(--acc);color:var(--on)}
 button.ghost{background:transparent}
 button.sm{min-height:36px;padding:0 10px;font-size:14px}
 button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
@@ -100,7 +102,7 @@ ul.pl li>span:last-child{flex:none;white-space:nowrap;color:var(--mut);font-vari
 @media(max-width:600px){.big{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .big div{background:var(--soft);border-radius:12px;padding:12px}
 .big b{display:block;font:700 clamp(26px,5vw,38px)/1 "Barlow Condensed",sans-serif;white-space:nowrap}
-.big div:first-child{background:var(--red);color:#fff}
+.big div:first-child{background:var(--acc);color:var(--on)}
 .big span{font-size:14px}
 .meal{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:4px 14px;padding:8px 0;border-top:1px solid var(--line)}
 .meal span{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -111,18 +113,18 @@ ul.pl li>span:last-child{flex:none;white-space:nowrap;color:var(--mut);font-vari
 .msg{padding:10px 12px;border-radius:10px;background:var(--zone);margin:10px 0;font-size:15px}
 .empty{padding:22px;text-align:center;color:var(--mut)}
 pre{overflow-x:auto;white-space:pre-wrap;font-size:13px;background:var(--soft);padding:10px;border-radius:8px}
-.auth{position:fixed;inset:0;z-index:20;background:var(--red);display:grid;place-items:center;padding:max(20px,env(safe-area-inset-top)) 16px 20px;overflow:auto}
+.auth{position:fixed;inset:0;z-index:20;background:var(--head);display:grid;place-items:center;padding:max(20px,env(safe-area-inset-top)) 16px 20px;overflow:auto}
 .auth[hidden]{display:none}
 .authbox{width:min(420px,100%)}
 .authbox .row button{flex:1 1 auto}
 h4{font:700 19px "Barlow Condensed",sans-serif;margin:20px 0 8px}
 .rem{border-top:1px solid var(--line);padding:12px 0}
 .sw{display:flex;gap:12px;align-items:flex-start;color:var(--ink);font-size:16px;cursor:pointer}
-.sw input{width:22px;height:22px;min-height:0;margin:2px 0 0;flex:none;accent-color:var(--red)}
+.sw input{width:22px;height:22px;min-height:0;margin:2px 0 0;flex:none;accent-color:var(--acc)}
 .remx{margin:10px 0 0 34px}
 .drag{min-height:40px;width:30px;padding:0;border:0;background:none;color:var(--mut);cursor:grab;touch-action:none;font-size:20px;line-height:1;user-select:none;-webkit-user-select:none}
 .drag:active{cursor:grabbing}
-.prow.dragging{background:var(--card);box-shadow:0 8px 22px rgba(0,0,0,.18);border-radius:8px;position:relative;z-index:2;outline:2px solid var(--red)}
+.prow.dragging{background:var(--card);box-shadow:0 8px 22px rgba(0,0,0,.18);border-radius:8px;position:relative;z-index:2;outline:2px solid var(--acc)}
 .plist.busy{user-select:none;-webkit-user-select:none}
 .pn{overflow-wrap:anywhere;hyphens:auto}
 @media(max-width:600px){.prow{grid-template-columns:30px minmax(0,1fr) 4.2em 5.2em 36px;row-gap:4px}.prow .pn{grid-column:2/-1;font-weight:600}.prow .drag{grid-row:span 2}.prow>input:first-of-type{grid-column:3}.prow.ph{display:none}}
@@ -153,7 +155,7 @@ h4{font:700 19px "Barlow Condensed",sans-serif;margin:20px 0 8px}
   <section id="v-uebersicht"><div class="grid two">
     <div class="card"><div class="weeknav"><button class="sm ghost" id="wPrev" aria-label="Vorherige Woche">‹</button><strong id="wLbl"></strong><button class="sm ghost" id="wNext" aria-label="Nächste Woche">›</button></div>
       <h2>Sätze pro Muskelgruppe</h2><div id="bars"></div>
-      <div class="legend"><span><i style="background:var(--zone)"></i>Zielbereich 10–20 Sätze/Woche</span><span><i style="background:var(--red);width:4px"></i>dein Plan</span><span><i style="background:var(--blue)"></i>erledigt</span></div>
+      <div class="legend"><span><i style="background:var(--zone)"></i>Zielbereich 10–20 Sätze/Woche</span><span><i style="background:var(--acc);width:4px"></i>dein Plan</span><span><i style="background:var(--blue)"></i>erledigt</span></div>
       <p class="small mut">Hauptmuskel zählt 1 Satz, mitarbeitende Muskeln ½ Satz (z. B. Trizeps beim Bankdrücken).</p></div>
     <div class="card" id="nextCard"></div>
   </div></section>
@@ -219,7 +221,7 @@ function rOverview(){const m0=monday(new Date());m0.setDate(m0.getDate()+wOff*7)
  const cw=S.workouts.filter(w=>parse(w.date)>=monday(new Date())).length,goal=S.settings.days.length||3;
  $('#wk').innerHTML=Array.from({length:goal},(_,i)=>`<div class="plate${i<cw?' on':''}">${i<cw?'✓':i+1}</div>`).join('')+`<span>${cw} von ${goal} Trainings diese Woche</span>`;
  const t=nextType(),last=sorted()[0];
- $('#nextCard').innerHTML=`<div class="next"><div><span class="tag">Als Nächstes</span><h2>${TY[t][0]}-Tag</h2><p class="mut" style="margin:4px 0 0">${TY[t][1]}</p></div><a class="btn pri" href="#training" style="display:inline-flex;align-items:center;text-decoration:none;background:var(--red);color:#fff;border-color:var(--red)">Training starten</a></div>
+ $('#nextCard').innerHTML=`<div class="next"><div><span class="tag">Als Nächstes</span><h2>${TY[t][0]}-Tag</h2><p class="mut" style="margin:4px 0 0">${TY[t][1]}</p></div><a class="btn pri" href="#training" style="display:inline-flex;align-items:center;text-decoration:none;background:var(--acc);color:var(--on);border-color:var(--acc)">Training starten</a></div>
  <ul class="pl">${S.plan[t].map(([id,n,r])=>{const l=lastSets(id);return `<li><span>${esc(exName(id))}${l?`<br><span class="small mut">Zuletzt: ${esc(setStr(l.s))}</span>`:''}</span><span>${n} × ${esc(r)}</span></li>`}).join('')}</ul>
  <p class="small mut">${last?`Letztes Training: ${TY[last.type][0]} am ${dShort(parse(last.date))}.`:'Noch kein Training eingetragen – leg los, die Balken füllen sich mit jedem Satz.'}</p>`}
 $('#wPrev').onclick=()=>{wOff--;rOverview()};$('#wNext').onclick=()=>{if(wOff<0){wOff++;rOverview()}};

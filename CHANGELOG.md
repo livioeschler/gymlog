@@ -2,6 +2,10 @@
 
 Neueste Einträge oben. Jeder tägliche Verbesserungs-Durchlauf ergänzt hier einen Abschnitt.
 
+## 2026-11-25 – Farbschema „Nebel“
+- Ruhigere Farben: helles Grau statt Rot im Kopfbereich, Schiefergrau als Akzent, gedämpftes Blaugrau für die Statistik
+- Dunkelmodus, Login-Bildschirm, App-Icon und Statusleiste angepasst
+
 ## 2026-11-25 – Handy-Ansicht repariert
 - Mealprep-Liste und „Zuletzt“-Zeilen liefen über den Bildschirmrand (Text wurde nicht umgebrochen)
 - Plan: auf schmalen Bildschirmen steht der Übungsname jetzt über Sätzen/Wdh. statt sich mit den Feldern zu überlappen
