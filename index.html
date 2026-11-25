@@ -110,10 +110,24 @@ ul.pl li span:last-child{white-space:nowrap;color:var(--mut);font-variant-numeri
 .msg{padding:10px 12px;border-radius:10px;background:var(--zone);margin:10px 0;font-size:15px}
 .empty{padding:22px;text-align:center;color:var(--mut)}
 pre{overflow-x:auto;white-space:pre-wrap;font-size:13px;background:var(--soft);padding:10px;border-radius:8px}
+.auth{position:fixed;inset:0;z-index:20;background:var(--red);display:grid;place-items:center;padding:max(20px,env(safe-area-inset-top)) 16px 20px;overflow:auto}
+.auth[hidden]{display:none}
+.authbox{width:min(420px,100%)}
+.authbox .row button{flex:1 1 auto}
 @media(prefers-reduced-motion:reduce){.fill{transition:none}}
 </style>
 </head>
 <body>
+<div id="auth" class="auth" hidden><div class="card authbox">
+  <h2 id="aTitle">Anmelden</h2><p class="small mut" id="aSub"></p>
+  <form id="aForm" novalidate>
+    <div id="aEmailW"><label for="aEmail">E-Mail</label><input id="aEmail" type="email" autocomplete="email" inputmode="email"></div>
+    <div id="aPwW" style="margin-top:10px"><label for="aPw">Passwort</label><input id="aPw" type="password" autocomplete="current-password"></div>
+    <div id="aMsg"></div>
+    <button class="pri" style="width:100%;margin-top:14px" id="aBtn">Anmelden</button>
+  </form>
+  <div class="row" style="margin-top:10px"><button class="ghost sm" id="aSwitch" type="button">Noch kein Konto? Registrieren</button><button class="ghost sm" id="aForgot" type="button">Passwort vergessen?</button></div>
+</div></div>
 <div id="install" class="msg" style="display:none;margin:0;border-radius:0;padding:10px max(5vw,16px)"></div>
 <header class="band"><div class="wrap">
   <div><h1>Gymlog</h1><p>Push · Pull · Legs – 3× pro Woche, Ziel Muskelaufbau</p><div class="status" id="status"></div></div>
@@ -132,7 +146,7 @@ pre{overflow-x:auto;white-space:pre-wrap;font-size:13px;background:var(--soft);p
   </div></section>
   <section id="v-training"><div class="card" id="train"></div></section>
   <section id="v-verlauf"><div class="card hist" id="hist"></div>
-    <div class="card" style="margin-top:22px" id="backup"><h3>Backup</h3><p class="small mut">Deine Daten liegen nur auf diesem Handy. Mach ab und zu ein Backup – z. B. vor einem Handywechsel – und speichere die Datei in iCloud/Google Drive.</p>
+    <div class="card" style="margin-top:22px" id="backup"><h3>Konto &amp; Backup</h3><div id="acct"></div><p class="small mut">Deine Trainings werden automatisch mit deinem Konto synchronisiert – auch auf anderen Geräten. Ohne Empfang speichert die App auf dem Handy und gleicht später ab. Ein zusätzliches Backup als Datei schadet trotzdem nie.</p>
       <div class="row"><button class="pri" id="bkExp">Backup herunterladen</button><label class="btn" style="display:inline-flex;align-items:center;justify-content:center;text-align:center;color:var(--ink);font-size:16px" for="bkFile">Backup einspielen</label><input type="file" id="bkFile" accept=".json,application/json" style="position:absolute;opacity:0;width:1px;height:1px"></div><div id="bkMsg"></div></div></section>
   <section id="v-plan"><div class="grid three" id="planCols"></div>
     <div class="grid two" style="margin-top:22px"><div class="card" id="remind"></div>
@@ -145,6 +159,7 @@ pre{overflow-x:auto;white-space:pre-wrap;font-size:13px;background:var(--soft);p
   </section>
   <section id="v-essen"><div class="grid two"><div><div class="card" id="calc"></div><div class="card" style="margin-top:22px" id="day"></div></div><div class="card" id="prep"></div></div></section>
 </div></main>
+<script src="vendor/supabase.js"></script>
 <script>
 {
 const $=s=>document.querySelector(s);
@@ -161,12 +176,13 @@ const DEF={updated:0,settings:{days:[1,3,5],time:'18:00',alarm:30,sex:'m',age:25
   pull:[['lat',4,'6–10'],['rud',3,'8–10'],['krud',3,'10–12'],['face',3,'15'],['curl',3,'8–12'],['hammer',2,'10–12']],
   legs:[['squat',4,'6–8'],['rdl',3,'8–10'],['press',3,'10–12'],['lc',3,'10–12'],['calf',4,'12–15'],['crunch',3,'12–15']]},custom:{},workouts:[]};
 const clone=o=>JSON.parse(JSON.stringify(o));
-const norm=s=>{if(!s||!s.plan)s=clone(DEF);s.settings={...DEF.settings,...s.settings};s.custom=s.custom||{};s.workouts=s.workouts||[];return s};
+const norm=s=>{if(!s||!s.plan)s=clone(DEF);s.settings={...DEF.settings,...s.settings};s.custom=s.custom||{};s.workouts=s.workouts||[];s.deleted=s.deleted||[];return s};
 function load(){let b=null;try{b=JSON.parse(localStorage.getItem(LS))}catch(e){}return norm(b)}
 let S=load();
 const exName=id=>EX[id]?.[0]||S.custom[id]?.n||id, exM=id=>EX[id]?.[1]||S.custom[id]?.m||{};
 const status=t=>{$('#status').textContent=t};
-function save(){S.updated=Date.now();try{localStorage.setItem(LS,JSON.stringify(S));status('Gespeichert ✓ auf diesem Gerät')}catch(e){status('Speichern fehlgeschlagen – Speicher voll?')}}
+const store=()=>{try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){status('Speichern fehlgeschlagen – Speicher voll?')}};
+function save(){S.updated=Date.now();store();setDirty(true);status('Gespeichert ✓');clearTimeout(syncT);syncT=setTimeout(sync,1200)}
 function download(name,text,type){const u=URL.createObjectURL(new Blob([text],{type}));const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000)}
 /* Datum */
 const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -243,7 +259,7 @@ function rHistory(){const ws=sorted();
   <table>${Object.entries(by).map(([id,s])=>`<tr><td>${esc(exName(id))}</td><td>${esc(setStr(s))}</td></tr>`).join('')}</table>
   ${w.note?`<p class="small">${esc(w.note)}</p>`:''}<p><button class="sm ghost" data-del="${esc(w.id)}">${confirmDel===w.id?'Wirklich löschen?':'Löschen'}</button></p></details>`}).join(''):'<div class="empty">Noch keine Trainings. Dein erstes erscheint hier, sobald du es speicherst.</div>')}
 $('#hist').addEventListener('click',ev=>{const b=ev.target.closest('[data-del]');if(!b)return;const id=b.dataset.del;
- if(confirmDel===id){S.workouts=S.workouts.filter(w=>w.id!==id);confirmDel=null;save();renderAll();return}confirmDel=id;b.textContent='Wirklich löschen?'});
+ if(confirmDel===id){S.workouts=S.workouts.filter(w=>w.id!==id);S.deleted.push(id);confirmDel=null;save();renderAll();return}confirmDel=id;b.textContent='Wirklich löschen?'});
 /* Plan + Erinnerung */
 const WD=['So','Mo','Di','Mi','Do','Fr','Sa'],BY=['SU','MO','TU','WE','TH','FR','SA'];
 const dayOrder=()=>[...S.settings.days].sort((a,b)=>(a+6)%7-(b+6)%7);
@@ -311,10 +327,67 @@ const VIEWS=['uebersicht','training','verlauf','plan','essen'];
 function route(){const h=location.hash.slice(1),v=VIEWS.includes(h)?h:'uebersicht';
  for(const x of VIEWS)document.getElementById('v-'+x).classList.toggle('on',x===v);
  document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+v))}
-function renderAll(){rOverview();rTraining();rHistory();rPlan();rFood();rPrep();route()}
+function renderAll(){rOverview();if(!$('#train').contains(document.activeElement))rTraining();rHistory();rPlan();rFood();rPrep();rAccount();route()}
 addEventListener('hashchange',()=>{route();scrollTo(0,0)});
+/* Login & Synchronisierung (Supabase) */
+let syncT;
+const SB_URL='https://vnshuumevvdcyukwswgd.supabase.co',SB_KEY='sb_publishable_6uDc10FyqxwV-IjB9RqX8Q_mcmp9uMK',LDIRTY='gymlog-dirty';
+const sb=window.supabase&&supabase.createClient?supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}):null;
+let user=null,syncing=false,again=false,lastSync=null,aMode='login';
+function setDirty(v){try{v?localStorage.setItem(LDIRTY,'1'):localStorage.removeItem(LDIRTY)}catch(e){}}
+const dirty=()=>{try{return localStorage.getItem(LDIRTY)==='1'}catch(e){return false}};
+function merge(a,b){const del=[...new Set([...(a.deleted||[]),...(b.deleted||[])])],ds=new Set(del),m=new Map();
+ for(const w of [...(b.workouts||[]),...(a.workouts||[])])m.set(w.id,w);
+ const newer=(a.updated||0)>=(b.updated||0)?a:b;
+ return norm({...newer,custom:{...(b.custom||{}),...(a.custom||{})},deleted:del,workouts:[...m.values()].filter(w=>!ds.has(w.id)),updated:Math.max(a.updated||0,b.updated||0)})}
+const sig=x=>`${x.updated||0}|${x.workouts.length}|${(x.deleted||[]).length}`;
+async function sync(){if(!sb||!user)return;if(!navigator.onLine){status('Offline gespeichert – wird später synchronisiert');return}
+ if(syncing){again=true;return}syncing=true;
+ try{const {data,error}=await sb.from('gymlog_state').select('data').eq('user_id',user.id).maybeSingle();if(error)throw error;
+  const before=sig(S);let remote=data&&data.data?norm(data.data):null;
+  if(remote)S=dirty()?merge(S,remote):((remote.updated||0)>=(S.updated||0)?merge(remote,S):merge(S,remote));
+  store();
+  if(!remote||sig(remote)!==sig(S)||dirty()){const {error:e2}=await sb.from('gymlog_state').upsert({user_id:user.id,data:S,updated_at:new Date().toISOString()});if(e2)throw e2}
+  setDirty(false);lastSync=new Date();status('Synchronisiert ✓');if(sig(S)!==before)renderAll();else rAccount()}
+ catch(e){status('Auf dem Gerät gespeichert – Synchronisierung folgt');console.warn(e)}
+ finally{syncing=false;if(again){again=false;sync()}}}
+function rAccount(){const el=$('#acct');if(!el)return;
+ el.innerHTML=user?`<ul class="pl"><li><span>Angemeldet als <b>${esc(user.email)}</b></span><span></span></li><li><span>Letzte Synchronisierung</span><span>${lastSync?lastSync.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+' Uhr':'–'}</span></li></ul>
+  <div class="row" style="margin:12px 0"><button id="syncNow">Jetzt synchronisieren</button><button class="ghost" id="logout">Abmelden</button></div>`:'<p class="mut">Nicht angemeldet.</p>'}
+$('#backup').addEventListener('click',async ev=>{if(ev.target.id==='syncNow')sync();
+ if(ev.target.id==='logout'){if(dirty())await sync();await sb.auth.signOut().catch(()=>{});try{localStorage.removeItem(LS);localStorage.removeItem(LD)}catch(e){}setDirty(false);S=norm(null);D=mkDraft('push');renderAll()}});
+const AM={login:['Anmelden','Melde dich an, um deine Trainings zu sichern und auf allen Geräten zu sehen.','Anmelden',1,1],
+ signup:['Konto erstellen','Mindestens 8 Zeichen fürs Passwort. Danach bekommst du eine E-Mail zum Bestätigen.','Registrieren',1,1],
+ forgot:['Passwort vergessen','Wir schicken dir einen Link, mit dem du ein neues Passwort setzen kannst.','Link senden',1,0],
+ reset:['Neues Passwort','Wähle ein neues Passwort (mindestens 8 Zeichen).','Passwort speichern',0,1]};
+function showAuth(mode,msg){aMode=mode;const [t,sub,btn,em,pw]=AM[mode];$('#auth').hidden=false;$('#aTitle').textContent=t;$('#aSub').textContent=sub;$('#aBtn').textContent=btn;
+ $('#aEmailW').style.display=em?'':'none';$('#aPwW').style.display=pw?'':'none';$('#aPw').autocomplete=mode==='login'?'current-password':'new-password';
+ $('#aSwitch').textContent=mode==='login'?'Noch kein Konto? Registrieren':'Zurück zum Anmelden';$('#aForgot').style.display=mode==='login'?'':'none';
+ aMsg(msg||(!navigator.onLine?'Du bist offline – zum Anmelden brauchst du einmal Internet.':''))}
+function aMsg(t){$('#aMsg').innerHTML=t?'<div class="msg"></div>':'';if(t)$('#aMsg').firstChild.textContent=t}
+const deErr=e=>{const m=String(e&&e.message||e);if(/invalid login/i.test(m))return'E-Mail oder Passwort stimmt nicht.';if(/not confirmed/i.test(m))return'Bitte bestätige zuerst deine E-Mail (Link im Postfach).';
+ if(/already registered/i.test(m))return'Für diese E-Mail gibt es schon ein Konto – melde dich an.';if(/signups? not allowed|disabled/i.test(m))return'Registrierung ist deaktiviert.';if(/password/i.test(m)&&/(6|8|short|weak)/i.test(m))return'Das Passwort ist zu kurz oder zu schwach.';
+ if(/fetch|network/i.test(m))return'Keine Verbindung – bitte später nochmal.';return'Fehler: '+m};
+$('#aSwitch').onclick=()=>showAuth(aMode==='login'?'signup':'login');$('#aForgot').onclick=()=>showAuth('forgot');
+$('#aForm').addEventListener('submit',async ev=>{ev.preventDefault();if(!sb)return;const email=$('#aEmail').value.trim(),pw=$('#aPw').value,b=$('#aBtn');
+ if(AM[aMode][3]&&!/^\S+@\S+\.\S+$/.test(email)){aMsg('Bitte eine gültige E-Mail eingeben.');return}
+ if(AM[aMode][4]&&aMode!=='login'&&pw.length<8){aMsg('Das Passwort braucht mindestens 8 Zeichen.');return}
+ b.disabled=true;aMsg('');const back=location.origin+location.pathname;
+ try{if(aMode==='login'){const {error}=await sb.auth.signInWithPassword({email,password:pw});if(error)throw error}
+  else if(aMode==='signup'){const {data,error}=await sb.auth.signUp({email,password:pw,options:{emailRedirectTo:back}});if(error)throw error;
+   if(!data.session){aMode='login';showAuth('login','Fast fertig: Öffne den Link in der E-Mail, die wir dir geschickt haben. Danach hier anmelden.')}}
+  else if(aMode==='forgot'){const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:back});if(error)throw error;showAuth('login','Link verschickt – schau in dein Postfach.')}
+  else{const {error}=await sb.auth.updateUser({password:pw});if(error)throw error;$('#auth').hidden=true;status('Passwort geändert ✓')}}
+ catch(e){aMsg(deErr(e))}finally{b.disabled=false}});
+function setUser(u){const was=user&&user.id;user=u||null;
+ if(user){if(aMode!=='reset')$('#auth').hidden=true;if(was!==user.id)setTimeout(sync,0)}else showAuth(aMode==='signup'?'signup':'login');rAccount()}
+if(sb){sb.auth.onAuthStateChange((ev,session)=>{if(ev==='PASSWORD_RECOVERY'){user=session&&session.user;setTimeout(()=>showAuth('reset'),0);return}setTimeout(()=>setUser(session&&session.user),0)})}
+else{status('Login konnte nicht geladen werden – Daten bleiben auf dem Gerät')}
+addEventListener('online',()=>sync());
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')sync()});
+
 renderAll();
-status(S.workouts.length?`${S.workouts.length} Trainings auf diesem Gerät gespeichert`:'Daten bleiben auf diesem Gerät gespeichert');
+
 $('#bkExp').onclick=()=>{download(`gymlog-backup-${iso(new Date())}.json`,JSON.stringify(S,null,1),'application/json');$('#bkMsg').innerHTML='<div class="msg">Backup geladen.</div>'};
 let pendingImport=null;
 $('#bkFile').onchange=async ev=>{const f=ev.target.files[0];if(!f)return;ev.target.value='';const m=$('#bkMsg');
