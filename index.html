@@ -25,6 +25,7 @@ LAYOUT: rotes Kopfband mit Wochenstand, Tabs, darunter eine ruhige Spalte bzw. z
 :root{color-scheme:light dark;--bg:light-dark(#f3f2ee,#121315);--ink:light-dark(#15171a,#ecebe6);--mut:light-dark(#5b5f66,#9da1a8);--line:light-dark(#dcdad3,#2b2d31);--card:light-dark(#fff,#1b1d20);--red:light-dark(#d4241c,#c9231b);--blue:light-dark(#1f5fbf,#5b9bff);--zone:light-dark(#dfe8f6,#1d2a3d);--soft:light-dark(#ecebe6,#232529)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
+html{overflow-x:clip}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Barlow,system-ui,sans-serif;overflow-x:clip}
 h1,h2,h3{font-family:"Barlow Condensed",Barlow,sans-serif;font-weight:700;line-height:1.05;margin:0;text-wrap:balance}
 h2{font-size:32px;margin-bottom:14px}h3{font-size:22px}
@@ -83,8 +84,8 @@ label{font-size:14px;color:var(--mut);display:block}
 .next h2{font-size:44px;margin:0}
 .tag{display:inline-block;font-size:13px;font-weight:600;padding:2px 9px;border-radius:99px;background:var(--soft);color:var(--mut)}
 ul.pl{list-style:none;margin:12px 0 0;padding:0}
-ul.pl li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
-ul.pl li span:last-child{white-space:nowrap;color:var(--mut);font-variant-numeric:tabular-nums}
+ul.pl li{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;overflow-wrap:anywhere;padding:8px 0;border-top:1px solid var(--line)}
+ul.pl li>span:last-child{flex:none;white-space:nowrap;color:var(--mut);font-variant-numeric:tabular-nums}
 .hist details{border-top:1px solid var(--line);padding:12px 0}
 .hist summary{cursor:pointer;display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap;list-style:none}
 .hist summary::-webkit-details-marker{display:none}
@@ -123,6 +124,8 @@ h4{font:700 19px "Barlow Condensed",sans-serif;margin:20px 0 8px}
 .drag:active{cursor:grabbing}
 .prow.dragging{background:var(--card);box-shadow:0 8px 22px rgba(0,0,0,.18);border-radius:8px;position:relative;z-index:2;outline:2px solid var(--red)}
 .plist.busy{user-select:none;-webkit-user-select:none}
+.pn{overflow-wrap:anywhere;hyphens:auto}
+@media(max-width:600px){.prow{grid-template-columns:30px minmax(0,1fr) 4.2em 5.2em 36px;row-gap:4px}.prow .pn{grid-column:2/-1;font-weight:600}.prow .drag{grid-row:span 2}.prow>input:first-of-type{grid-column:3}.prow.ph{display:none}}
 .newx{margin-top:12px;padding:12px;border-radius:12px;background:var(--soft)}
 @media(prefers-reduced-motion:reduce){.fill{transition:none}}
 </style>
@@ -280,8 +283,8 @@ let newEx=null;
 const mgOpts=(sel)=>MG.map(([k,l])=>`<option value="${k}" ${k===sel?'selected':''}>${l}</option>`).join('');
 function rPlan(){const all=[...Object.keys(EX),...Object.keys(S.custom)].sort((a,b)=>exName(a).localeCompare(exName(b),'de'));
  $('#planCols').innerHTML=ORDER.map(t=>`<div class="card"><h3>${TY[t][0]}</h3><p class="small mut" style="margin:2px 0 10px">${TY[t][1]}</p>
-  <div class="prow small mut" style="border:0"><span></span><span>Übung</span><span>Sätze</span><span>Wdh.</span><span></span></div>
-  <div class="plist">${S.plan[t].map(([id,n,r],i)=>`<div class="prow" data-row="${i}"><button class="drag" data-drag="${t}" data-i="${i}" aria-label="${esc(exName(id))} verschieben – ziehen oder Pfeiltasten">⠿</button><span>${esc(exName(id))}</span><input inputmode="numeric" aria-label="Sätze" data-t="${t}" data-i="${i}" data-f="1" value="${n}"><input aria-label="Wiederholungen" data-t="${t}" data-i="${i}" data-f="2" value="${esc(r)}"><button class="sm ghost" data-rm="${t}" data-i="${i}" aria-label="Entfernen">✕</button></div>`).join('')}</div>
+  <div class="prow ph small mut" style="border:0"><span></span><span>Übung</span><span>Sätze</span><span>Wdh.</span><span></span></div>
+  <div class="plist">${S.plan[t].map(([id,n,r],i)=>`<div class="prow" data-row="${i}"><button class="drag" data-drag="${t}" data-i="${i}" aria-label="${esc(exName(id))} verschieben – ziehen oder Pfeiltasten">⠿</button><span class="pn">${esc(exName(id))}</span><input inputmode="numeric" aria-label="Sätze" data-t="${t}" data-i="${i}" data-f="1" value="${n}"><input aria-label="Wiederholungen" data-t="${t}" data-i="${i}" data-f="2" value="${esc(r)}"><button class="sm ghost" data-rm="${t}" data-i="${i}" aria-label="Entfernen">✕</button></div>`).join('')}</div>
   ${newEx===t?`<div class="newx"><b>Neue Übung für ${TY[t][0]}</b>
    <div style="margin-top:8px"><label>Name</label><input data-nx="name" placeholder="z. B. Butterfly Maschine"></div>
    <div class="row" style="margin-top:8px"><div><label>Hauptmuskel</label><select data-nx="m1">${mgOpts(t==='push'?'brust':t==='pull'?'ruecken':'quads')}</select></div><div><label>Nebenmuskel</label><select data-nx="m2"><option value="">keiner</option>${mgOpts('')}</select></div></div>
