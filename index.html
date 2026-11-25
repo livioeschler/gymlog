@@ -90,7 +90,7 @@ ul.pl li span:last-child{white-space:nowrap;color:var(--mut);font-variant-numeri
 .hist summary::-webkit-details-marker{display:none}
 .hist table{width:100%;border-collapse:collapse;margin-top:8px;font-size:15px}
 .hist td{padding:4px 0;border-bottom:1px solid var(--line)}.hist td:last-child{text-align:right;font-variant-numeric:tabular-nums}
-.prow{display:grid;grid-template-columns:minmax(0,1fr) 4.2em 5.2em 36px;gap:6px;align-items:center;padding:5px 0;border-top:1px solid var(--line)}
+.prow{display:grid;grid-template-columns:30px minmax(0,1fr) 4.2em 5.2em 36px;gap:6px;align-items:center;padding:5px 0;border-top:1px solid var(--line)}
 .prow input{min-height:36px;padding:4px 6px;text-align:center}
 .days{display:flex;flex-wrap:wrap;gap:6px}
 .days label{display:flex;align-items:center;gap:4px;padding:0 12px;min-height:44px;border:1px solid var(--line);border-radius:10px;color:var(--ink);font-size:16px;cursor:pointer}
@@ -119,6 +119,10 @@ h4{font:700 19px "Barlow Condensed",sans-serif;margin:20px 0 8px}
 .sw{display:flex;gap:12px;align-items:flex-start;color:var(--ink);font-size:16px;cursor:pointer}
 .sw input{width:22px;height:22px;min-height:0;margin:2px 0 0;flex:none;accent-color:var(--red)}
 .remx{margin:10px 0 0 34px}
+.drag{min-height:40px;width:30px;padding:0;border:0;background:none;color:var(--mut);cursor:grab;touch-action:none;font-size:20px;line-height:1;user-select:none;-webkit-user-select:none}
+.drag:active{cursor:grabbing}
+.prow.dragging{background:var(--card);box-shadow:0 8px 22px rgba(0,0,0,.18);border-radius:8px;position:relative;z-index:2;outline:2px solid var(--red)}
+.plist.busy{user-select:none;-webkit-user-select:none}
 .newx{margin-top:12px;padding:12px;border-radius:12px;background:var(--soft)}
 @media(prefers-reduced-motion:reduce){.fill{transition:none}}
 </style>
@@ -276,8 +280,8 @@ let newEx=null;
 const mgOpts=(sel)=>MG.map(([k,l])=>`<option value="${k}" ${k===sel?'selected':''}>${l}</option>`).join('');
 function rPlan(){const all=[...Object.keys(EX),...Object.keys(S.custom)].sort((a,b)=>exName(a).localeCompare(exName(b),'de'));
  $('#planCols').innerHTML=ORDER.map(t=>`<div class="card"><h3>${TY[t][0]}</h3><p class="small mut" style="margin:2px 0 10px">${TY[t][1]}</p>
-  <div class="prow small mut" style="border:0"><span>Übung</span><span>Sätze</span><span>Wdh.</span><span></span></div>
-  ${S.plan[t].map(([id,n,r],i)=>`<div class="prow"><span>${esc(exName(id))}</span><input inputmode="numeric" aria-label="Sätze" data-t="${t}" data-i="${i}" data-f="1" value="${n}"><input aria-label="Wiederholungen" data-t="${t}" data-i="${i}" data-f="2" value="${esc(r)}"><button class="sm ghost" data-rm="${t}" data-i="${i}" aria-label="Entfernen">✕</button></div>`).join('')}
+  <div class="prow small mut" style="border:0"><span></span><span>Übung</span><span>Sätze</span><span>Wdh.</span><span></span></div>
+  <div class="plist">${S.plan[t].map(([id,n,r],i)=>`<div class="prow" data-row="${i}"><button class="drag" data-drag="${t}" data-i="${i}" aria-label="${esc(exName(id))} verschieben – ziehen oder Pfeiltasten">⠿</button><span>${esc(exName(id))}</span><input inputmode="numeric" aria-label="Sätze" data-t="${t}" data-i="${i}" data-f="1" value="${n}"><input aria-label="Wiederholungen" data-t="${t}" data-i="${i}" data-f="2" value="${esc(r)}"><button class="sm ghost" data-rm="${t}" data-i="${i}" aria-label="Entfernen">✕</button></div>`).join('')}</div>
   ${newEx===t?`<div class="newx"><b>Neue Übung für ${TY[t][0]}</b>
    <div style="margin-top:8px"><label>Name</label><input data-nx="name" placeholder="z. B. Butterfly Maschine"></div>
    <div class="row" style="margin-top:8px"><div><label>Hauptmuskel</label><select data-nx="m1">${mgOpts(t==='push'?'brust':t==='pull'?'ruecken':'quads')}</select></div><div><label>Nebenmuskel</label><select data-nx="m2"><option value="">keiner</option>${mgOpts('')}</select></div></div>
@@ -297,6 +301,25 @@ $('#planCols').addEventListener('click',ev=>{const b=ev.target.closest('button')
   const id='c'+Date.now().toString(36),m1=g('m1'),m2=g('m2'),m={[m1]:1};if(m2&&m2!==m1)m[m2]=.5;
   S.custom[id]={n,m};S.plan[b.dataset.nxsave].push([id,Math.max(1,Math.round(num(g('sets')))||3),g('reps')||'8–12']);newEx=null;save();rPlan();rOverview();
   if(!$('#train').contains(document.activeElement))rTraining()}});
+/* Übungen per Drag & Drop sortieren */
+let drag=null;
+function moved(t,order){if(order.every((v,i)=>v===i))return;S.plan[t]=order.map(i=>S.plan[t][i]);
+ if(D.type===t&&!touched()){D=mkDraft(t);saveDraft()}save();rPlan();rOverview();if(!$('#train').contains(document.activeElement))rTraining()}
+$('#planCols').addEventListener('pointerdown',ev=>{const h=ev.target.closest('[data-drag]');if(!h||ev.button>0)return;ev.preventDefault();
+ const row=h.closest('.prow');drag={t:h.dataset.drag,row,list:row.parentElement,id:ev.pointerId};row.classList.add('dragging');drag.list.classList.add('busy');
+ try{h.setPointerCapture(ev.pointerId)}catch(e){}});
+$('#planCols').addEventListener('pointermove',ev=>{if(!drag||ev.pointerId!==drag.id)return;ev.preventDefault();
+ const rows=[...drag.list.querySelectorAll('.prow[data-row]')].filter(r=>r!==drag.row);let before=null;
+ for(const r of rows){const b=r.getBoundingClientRect();if(ev.clientY<b.top+b.height/2){before=r;break}}
+ if(before){if(drag.row.nextElementSibling!==before)drag.list.insertBefore(drag.row,before)}else if(rows.length&&drag.list.lastElementChild!==drag.row)drag.list.appendChild(drag.row);
+ if(ev.clientY<70)scrollBy(0,-12);else if(ev.clientY>innerHeight-70)scrollBy(0,12)});
+const endDrag=ev=>{if(!drag||ev.pointerId!==drag.id)return;const{t,list,row}=drag;drag=null;row.classList.remove('dragging');list.classList.remove('busy');
+ moved(t,[...list.querySelectorAll('.prow[data-row]')].map(r=>+r.dataset.row))};
+$('#planCols').addEventListener('pointerup',endDrag);$('#planCols').addEventListener('pointercancel',endDrag);
+$('#planCols').addEventListener('keydown',ev=>{const h=ev.target.closest('[data-drag]');if(!h||!['ArrowUp','ArrowDown'].includes(ev.key))return;ev.preventDefault();
+ const t=h.dataset.drag,i=+h.dataset.i,j=i+(ev.key==='ArrowUp'?-1:1),n=S.plan[t].length;if(j<0||j>=n)return;
+ const order=[...Array(n).keys()];[order[i],order[j]]=[order[j],order[i]];moved(t,order);
+ const f=document.querySelector(`[data-drag="${t}"][data-i="${j}"]`);if(f)f.focus()});
 function rRemind(){const s=S.settings,r=rem(),dO=dayOrder();
  const tog=(k,label,desc,extra)=>`<div class="rem"><label class="sw"><input type="checkbox" data-rk="${k}" ${r[k].on?'checked':''}><span><b>${label}</b><br><span class="small mut">${desc}</span></span></label>${r[k].on&&extra?`<div class="remx">${extra}</div>`:''}</div>`;
  const tm=(path,v,l)=>`<div><label>${l}</label><input type="time" data-r="${path}" value="${esc(v)}"></div>`;
