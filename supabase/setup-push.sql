@@ -11,6 +11,11 @@ create policy "subs anlegen" on public.push_subs for insert to authenticated wit
 create policy "subs ändern" on public.push_subs for update to authenticated using ((select auth.uid()) = user_id) with check ((select auth.uid()) = user_id);
 create policy "subs löschen" on public.push_subs for delete to authenticated using ((select auth.uid()) = user_id);
 
+-- Rechte für die App (angemeldete Nutzer) und die Edge Function
+grant select, insert, update, delete on public.push_subs to authenticated;
+grant select, insert, update, delete on public.gymlog_state to authenticated;
+grant all on public.push_subs, public.gymlog_state to service_role;
+
 -- Stündlicher Aufruf der Funktion (die Funktion entscheidet selbst, ob gerade 11/14/17/20 Uhr ist)
 create extension if not exists pg_cron;
 create extension if not exists pg_net;

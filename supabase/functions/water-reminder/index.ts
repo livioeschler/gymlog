@@ -21,8 +21,19 @@ const WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const liter = (ml: number) => (ml / 1000).toLocaleString("de-DE", { maximumFractionDigits: 2 });
 
 Deno.serve(async (req) => {
-  if (req.headers.get("x-cron-secret") !== Deno.env.get("CRON_SECRET")) {
-    return new Response("forbidden", { status: 403 });
+  const expected = (Deno.env.get("CRON_SECRET") ?? "").trim();
+  const got = (req.headers.get("x-cron-secret") ?? "").trim();
+  if (!expected || got !== expected) {
+    // Diagnose ohne das Passwort selbst zu verraten
+    const info = {
+      secret_in_supabase_gesetzt: expected.length > 0,
+      laenge_secret: expected.length,
+      header_mitgeschickt: got.length > 0,
+      laenge_header: got.length,
+      gleicher_anfang: expected.length > 2 && got.slice(0, 2) === expected.slice(0, 2),
+    };
+    console.log("forbidden", JSON.stringify(info));
+    return Response.json({ error: "forbidden", ...info }, { status: 403 });
   }
   const test = new URL(req.url).searchParams.get("test") === "1";
 
