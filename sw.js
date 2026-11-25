@@ -1,6 +1,6 @@
 // Gymlog Service Worker: macht die App offline nutzbar.
 // Bei Änderungen an der App die Versionsnummer erhöhen.
-const CACHE = 'gymlog-v7';
+const CACHE = 'gymlog-v8';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './vendor/supabase.js'];
 
 self.addEventListener('install', e => {
