@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gymlog – Push Pull Legs</title>
+<meta name="theme-color" content="#d4241c">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Gymlog">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/*
+VOICE: kurz, motivierend, wie ein Trainer am Whiteboard – keine Floskeln.
+IDEA: das Logbuch an der Hantelbank, Farben der Wettkampf-Hantelscheiben.
+PICTURE: die Wochen-Balken pro Muskelgruppe mit Zielbereich, gleich oben.
+COLOUR and TYPE: Kreideweiß/Gummiboden-Anthrazit, Scheiben-Rot als Band, Scheiben-Blau als Daten; Barlow Condensed + Barlow.
+LAYOUT: rotes Kopfband mit Wochenstand, Tabs, darunter eine ruhige Spalte bzw. zwei Spalten ab 900px.
+*/
+:root{color-scheme:light dark;--bg:light-dark(#f3f2ee,#121315);--ink:light-dark(#15171a,#ecebe6);--mut:light-dark(#5b5f66,#9da1a8);--line:light-dark(#dcdad3,#2b2d31);--card:light-dark(#fff,#1b1d20);--red:light-dark(#d4241c,#c9231b);--blue:light-dark(#1f5fbf,#5b9bff);--zone:light-dark(#dfe8f6,#1d2a3d);--soft:light-dark(#ecebe6,#232529)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Barlow,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:"Barlow Condensed",Barlow,sans-serif;font-weight:700;line-height:1.05;margin:0;text-wrap:balance}
+h2{font-size:32px;margin-bottom:14px}h3{font-size:22px}
+.band{padding:clamp(22px,4vw,48px) max(5vw,16px)}
+.wrap{max-width:1180px;margin:0 auto}
+header{background:var(--red);color:#fff;padding-top:max(clamp(22px,4vw,48px),env(safe-area-inset-top))}
+main{padding-bottom:max(48px,env(safe-area-inset-bottom))}
+header .wrap{display:flex;flex-wrap:wrap;gap:18px 40px;align-items:flex-end;justify-content:space-between}
+header h1{font-size:clamp(40px,6vw,52px);letter-spacing:.5px}
+header p{margin:4px 0 0;opacity:.9}
+.wk{display:flex;gap:10px;align-items:center}
+.plate{width:46px;height:46px;border-radius:50%;border:3px solid rgba(255,255,255,.85);display:grid;place-items:center;font:700 18px "Barlow Condensed",sans-serif}
+.plate.on{background:#fff;color:var(--red)}
+.wk span{font-size:14px;opacity:.9;max-width:9em;line-height:1.25}
+nav{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;overflow-x:auto;scrollbar-width:none;gap:4px;padding:0 max(5vw,16px)}
+nav a{flex:none;padding:13px 14px;color:var(--mut);text-decoration:none;font-weight:600;border-bottom:3px solid transparent}
+nav a.on{color:var(--ink);border-color:var(--red)}
+section{display:none}section.on{display:block}
+.grid{display:grid;gap:22px;grid-template-columns:minmax(0,1fr)}
+@media(min-width:900px){.grid.two{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px}
+.mut{color:var(--mut)}.small{font-size:14px}
+.mrow{display:grid;grid-template-columns:7.2em minmax(0,1fr) 3.2em;gap:10px;align-items:center;padding:6px 0}
+.ml{font-weight:600}.mv{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.track{position:relative;height:22px;background:var(--soft);border-radius:6px;overflow:hidden}
+.zone{position:absolute;inset:0 auto 0 41.67%;width:41.67%;background:var(--zone)}
+.fill{position:absolute;inset:0 auto 0 0;background:var(--blue);border-radius:6px;transition:width .5s}
+.fill.low{background:color-mix(in srgb,var(--blue) 45%,transparent)}
+.pm{position:absolute;top:-2px;bottom:-2px;width:3px;margin-left:-1px;background:var(--red)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--mut);margin-top:10px}
+.legend i{display:inline-block;width:14px;height:12px;border-radius:3px;vertical-align:-1px;margin-right:5px}
+.weeknav{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.weeknav strong{flex:1;font-size:17px}
+button,.btn{font:600 16px Barlow,sans-serif;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button.pri{background:var(--red);border-color:var(--red);color:#fff}
+button.ghost{background:transparent}
+button.sm{min-height:36px;padding:0 10px;font-size:14px}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+input,select,textarea{font:16px Barlow,sans-serif;min-height:44px;padding:8px 10px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--ink);width:100%}
+textarea{min-height:80px}
+label{font-size:14px;color:var(--mut);display:block}
+.ex{border-top:1px solid var(--line);padding:14px 0}
+.ex:first-child{border-top:0}
+.exh{display:flex;gap:8px;align-items:baseline;justify-content:space-between}
+.exh b{font-size:18px}
+.last{font-size:14px;color:var(--mut);margin:2px 0 8px}
+.sets{display:grid;grid-template-columns:2.2em minmax(0,1fr) minmax(0,1fr) 40px;gap:6px 8px;align-items:center}
+.sets .h{font-size:13px;color:var(--mut)}
+.sets .n{font-weight:600;color:var(--mut);text-align:center}
+.types{display:flex;gap:8px;flex-wrap:wrap}
+.types button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+.row>*{flex:1 1 140px}
+.next{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.next h2{font-size:44px;margin:0}
+.tag{display:inline-block;font-size:13px;font-weight:600;padding:2px 9px;border-radius:99px;background:var(--soft);color:var(--mut)}
+ul.pl{list-style:none;margin:12px 0 0;padding:0}
+ul.pl li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+ul.pl li span:last-child{white-space:nowrap;color:var(--mut);font-variant-numeric:tabular-nums}
+.hist details{border-top:1px solid var(--line);padding:12px 0}
+.hist summary{cursor:pointer;display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap;list-style:none}
+.hist summary::-webkit-details-marker{display:none}
+.hist table{width:100%;border-collapse:collapse;margin-top:8px;font-size:15px}
+.hist td{padding:4px 0;border-bottom:1px solid var(--line)}.hist td:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.prow{display:grid;grid-template-columns:minmax(0,1fr) 4.2em 5.2em 36px;gap:6px;align-items:center;padding:5px 0;border-top:1px solid var(--line)}
+.prow input{min-height:36px;padding:4px 6px;text-align:center}
+.days{display:flex;flex-wrap:wrap;gap:6px}
+.days label{display:flex;align-items:center;gap:4px;padding:0 12px;min-height:44px;border:1px solid var(--line);border-radius:10px;color:var(--ink);font-size:16px;cursor:pointer}
+.days input{width:auto;min-height:0}
+.big{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}
+@media(max-width:600px){.big{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.big div{background:var(--soft);border-radius:12px;padding:12px}
+.big b{display:block;font:700 clamp(26px,5vw,38px)/1 "Barlow Condensed",sans-serif;white-space:nowrap}
+.big div:first-child{background:var(--red);color:#fff}
+.big span{font-size:14px}
+.meal{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:4px 14px;padding:8px 0;border-top:1px solid var(--line)}
+.meal span{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.recipe{border-top:1px solid var(--line);padding:12px 0}
+.recipe summary{cursor:pointer;font-weight:600;font-size:18px}
+.recipe ul,.recipe ol{margin:8px 0;padding-left:20px}
+.status{font-size:14px;opacity:.9;margin-top:6px}
+.msg{padding:10px 12px;border-radius:10px;background:var(--zone);margin:10px 0;font-size:15px}
+.empty{padding:22px;text-align:center;color:var(--mut)}
+pre{overflow-x:auto;white-space:pre-wrap;font-size:13px;background:var(--soft);padding:10px;border-radius:8px}
+@media(prefers-reduced-motion:reduce){.fill{transition:none}}
+</style>
+</head>
+<body>
+<div id="install" class="msg" style="display:none;margin:0;border-radius:0;padding:10px max(5vw,16px)"></div>
+<header class="band"><div class="wrap">
+  <div><h1>Gymlog</h1><p>Push · Pull · Legs – 3× pro Woche, Ziel Muskelaufbau</p><div class="status" id="status"></div></div>
+  <div class="wk" id="wk"></div>
+</div></header>
+<nav><div class="wrap">
+  <a href="#uebersicht">Übersicht</a><a href="#training">Training</a><a href="#verlauf">Verlauf</a><a href="#plan">Plan &amp; Erinnerung</a><a href="#essen">Ernährung</a>
+</div></nav>
+<main class="band"><div class="wrap">
+  <section id="v-uebersicht"><div class="grid two">
+    <div class="card"><div class="weeknav"><button class="sm ghost" id="wPrev" aria-label="Vorherige Woche">‹</button><strong id="wLbl"></strong><button class="sm ghost" id="wNext" aria-label="Nächste Woche">›</button></div>
+      <h2>Sätze pro Muskelgruppe</h2><div id="bars"></div>
+      <div class="legend"><span><i style="background:var(--zone)"></i>Zielbereich 10–20 Sätze/Woche</span><span><i style="background:var(--red);width:4px"></i>dein Plan</span><span><i style="background:var(--blue)"></i>erledigt</span></div>
+      <p class="small mut">Hauptmuskel zählt 1 Satz, mitarbeitende Muskeln ½ Satz (z. B. Trizeps beim Bankdrücken).</p></div>
+    <div class="card" id="nextCard"></div>
+  </div></section>
+  <section id="v-training"><div class="card" id="train"></div></section>
+  <section id="v-verlauf"><div class="card hist" id="hist"></div>
+    <div class="card" style="margin-top:22px" id="backup"><h3>Backup</h3><p class="small mut">Deine Daten liegen nur auf diesem Handy. Mach ab und zu ein Backup – z. B. vor einem Handywechsel – und speichere die Datei in iCloud/Google Drive.</p>
+      <div class="row"><button class="pri" id="bkExp">Backup herunterladen</button><label class="btn" style="display:inline-flex;align-items:center;justify-content:center;text-align:center;color:var(--ink);font-size:16px" for="bkFile">Backup einspielen</label><input type="file" id="bkFile" accept=".json,application/json" style="position:absolute;opacity:0;width:1px;height:1px"></div><div id="bkMsg"></div></div></section>
+  <section id="v-plan"><div class="grid three" id="planCols"></div>
+    <div class="grid two" style="margin-top:22px"><div class="card" id="remind"></div>
+    <div class="card"><h3>So wächst du am meisten</h3>
+      <ul><li><b>Doppelte Progression:</b> Bleib im Wiederholungsbereich. Schaffst du in allen Sätzen das obere Ende, erhöhe das Gewicht (2,5 kg Grundübungen, 1–2 kg Isolation).</li>
+      <li><b>Nahe ans Versagen:</b> Beende Arbeitssätze mit 1–3 Wiederholungen in Reserve.</li>
+      <li><b>Pausen:</b> 2–3 Min. bei Grundübungen, 1–2 Min. bei Isolation.</li>
+      <li><b>Aufwärmen:</b> 2–3 leichtere Sätze vor der ersten Übung zählen nicht als Arbeitssätze – nicht eintragen.</li>
+      <li><b>Verpasstes Training?</b> Einfach mit dem nächsten Tag der Reihe weitermachen – die Übersicht schlägt ihn automatisch vor.</li></ul></div></div>
+  </section>
+  <section id="v-essen"><div class="grid two"><div><div class="card" id="calc"></div><div class="card" style="margin-top:22px" id="day"></div></div><div class="card" id="prep"></div></div></section>
+</div></main>
+<script>
+{
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=n=>(+n||0).toLocaleString('de-DE',{maximumFractionDigits:1});
+const num=v=>{const x=parseFloat(String(v).replace(',','.'));return isFinite(x)?x:0};
+const LS='gymlog-state',LD='gymlog-draft';
+const MG=[['brust','Brust'],['ruecken','Rücken'],['schultern','Schultern'],['bizeps','Bizeps'],['trizeps','Trizeps'],['quads','Quadrizeps'],['beinbeuger','Beinbeuger'],['gesaess','Gesäß'],['waden','Waden'],['bauch','Bauch']];
+const EX={bank:['Bankdrücken',{brust:1,trizeps:.5,schultern:.5}],schraeg:['Schrägbankdrücken (KH)',{brust:1,schultern:.5,trizeps:.5}],fly:['Kabel-Fliegende',{brust:1}],ohp:['Schulterdrücken (KH)',{schultern:1,trizeps:.5}],seit:['Seitheben',{schultern:1}],pushd:['Trizepsdrücken am Kabel',{trizeps:1}],ohext:['Trizeps über Kopf',{trizeps:1}],dips:['Dips',{trizeps:1,brust:.5}],lat:['Latzug / Klimmzüge',{ruecken:1,bizeps:.5}],rud:['Langhantelrudern',{ruecken:1,bizeps:.5}],krud:['Kabelrudern eng',{ruecken:1,bizeps:.5}],face:['Face Pulls',{schultern:1,ruecken:.5}],curl:['SZ-Curls',{bizeps:1}],hammer:['Hammercurls',{bizeps:1}],kreuz:['Kreuzheben',{gesaess:1,beinbeuger:.5,ruecken:.5}],squat:['Kniebeugen',{quads:1,gesaess:.5}],rdl:['Rumänisches Kreuzheben',{beinbeuger:1,gesaess:.5}],press:['Beinpresse',{quads:1,gesaess:.5}],lc:['Beinbeuger (Maschine)',{beinbeuger:1}],ext:['Beinstrecker',{quads:1}],lunge:['Ausfallschritte',{quads:1,gesaess:.5}],hip:['Hip Thrust',{gesaess:1,beinbeuger:.5}],calf:['Wadenheben',{waden:1}],crunch:['Kabel-Crunch',{bauch:1}],legr:['Beinheben hängend',{bauch:1}]};
+const TY={push:['Push','Brust · Schultern · Trizeps'],pull:['Pull','Rücken · Bizeps · hintere Schulter'],legs:['Legs','Beine · Gesäß · Bauch']};
+const ORDER=['push','pull','legs'];
+const DEF={updated:0,settings:{days:[1,3,5],time:'18:00',alarm:30,sex:'m',age:25,height:180,weight:75,act:1.5,surplus:250},
+ plan:{push:[['bank',4,'6–8'],['schraeg',3,'8–10'],['ohp',3,'8–10'],['seit',4,'12–15'],['fly',2,'12–15'],['pushd',3,'10–12']],
+  pull:[['lat',4,'6–10'],['rud',3,'8–10'],['krud',3,'10–12'],['face',3,'15'],['curl',3,'8–12'],['hammer',2,'10–12']],
+  legs:[['squat',4,'6–8'],['rdl',3,'8–10'],['press',3,'10–12'],['lc',3,'10–12'],['calf',4,'12–15'],['crunch',3,'12–15']]},custom:{},workouts:[]};
+const clone=o=>JSON.parse(JSON.stringify(o));
+const norm=s=>{if(!s||!s.plan)s=clone(DEF);s.settings={...DEF.settings,...s.settings};s.custom=s.custom||{};s.workouts=s.workouts||[];return s};
+function load(){let b=null;try{b=JSON.parse(localStorage.getItem(LS))}catch(e){}return norm(b)}
+let S=load();
+const exName=id=>EX[id]?.[0]||S.custom[id]?.n||id, exM=id=>EX[id]?.[1]||S.custom[id]?.m||{};
+const status=t=>{$('#status').textContent=t};
+function save(){S.updated=Date.now();try{localStorage.setItem(LS,JSON.stringify(S));status('Gespeichert ✓ auf diesem Gerät')}catch(e){status('Speichern fehlgeschlagen – Speicher voll?')}}
+function download(name,text,type){const u=URL.createObjectURL(new Blob([text],{type}));const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000)}
+/* Datum */
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const parse=s=>{const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const monday=d=>{const x=new Date(d);x.setHours(0,0,0,0);x.setDate(x.getDate()-((x.getDay()+6)%7));return x};
+const dShort=d=>d.toLocaleDateString('de-DE',{weekday:'short',day:'numeric',month:'short'});
+const sorted=()=>[...S.workouts].sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
+function muscles(ws){const o={};for(const w of ws)for(const s of w.sets)if(num(s.r)>0)for(const[k,v]of Object.entries(exM(s.ex)))o[k]=(o[k]||0)+v;return o}
+function planMuscles(){const o={};for(const t of ORDER)for(const[id,n]of S.plan[t])for(const[k,v]of Object.entries(exM(id)))o[k]=(o[k]||0)+v*n;return o}
+const nextType=()=>{const l=sorted()[0];return l?ORDER[(ORDER.indexOf(l.type)+1)%3]:'push'};
+function lastSets(id){for(const w of sorted()){const s=w.sets.filter(x=>x.ex===id&&num(x.r)>0);if(s.length)return{date:w.date,s}}return null}
+const setStr=s=>s.map(x=>`${fmt(x.w)}×${fmt(x.r)}`).join(' · ');
+/* Übersicht */
+let wOff=0;
+function rOverview(){const m0=monday(new Date());m0.setDate(m0.getDate()+wOff*7);const m1=new Date(m0);m1.setDate(m1.getDate()+7);
+ const ws=S.workouts.filter(w=>{const d=parse(w.date);return d>=m0&&d<m1});const done=muscles(ws),pl=planMuscles(),MAX=24;
+ const end=new Date(m1);end.setDate(end.getDate()-1);
+ $('#wLbl').textContent=(wOff===0?'Diese Woche':wOff===-1?'Letzte Woche':'Woche')+` · ${m0.toLocaleDateString('de-DE',{day:'numeric',month:'short'})} – ${end.toLocaleDateString('de-DE',{day:'numeric',month:'short'})} · ${ws.length} Training${ws.length===1?'':'s'}`;
+ $('#wNext').disabled=wOff>=0;
+ $('#bars').innerHTML=MG.map(([k,l])=>{const v=done[k]||0,p=pl[k]||0;return `<div class="mrow" title="${esc(l)}: ${fmt(v)} von geplant ${fmt(p)} Sätzen"><span class="ml">${l}</span><div class="track"><i class="zone"></i><b class="fill${v<10?' low':''}" style="width:${Math.min(v,MAX)/MAX*100}%"></b><u class="pm" style="left:${Math.min(p,MAX)/MAX*100}%"></u></div><span class="mv">${fmt(v)}</span></div>`}).join('');
+ const cw=S.workouts.filter(w=>parse(w.date)>=monday(new Date())).length,goal=S.settings.days.length||3;
+ $('#wk').innerHTML=Array.from({length:goal},(_,i)=>`<div class="plate${i<cw?' on':''}">${i<cw?'✓':i+1}</div>`).join('')+`<span>${cw} von ${goal} Trainings diese Woche</span>`;
+ const t=nextType(),last=sorted()[0];
+ $('#nextCard').innerHTML=`<div class="next"><div><span class="tag">Als Nächstes</span><h2>${TY[t][0]}-Tag</h2><p class="mut" style="margin:4px 0 0">${TY[t][1]}</p></div><a class="btn pri" href="#training" style="display:inline-flex;align-items:center;text-decoration:none;background:var(--red);color:#fff;border-color:var(--red)">Training starten</a></div>
+ <ul class="pl">${S.plan[t].map(([id,n,r])=>{const l=lastSets(id);return `<li><span>${esc(exName(id))}${l?`<br><span class="small mut">Zuletzt: ${esc(setStr(l.s))}</span>`:''}</span><span>${n} × ${esc(r)}</span></li>`}).join('')}</ul>
+ <p class="small mut">${last?`Letztes Training: ${TY[last.type][0]} am ${dShort(parse(last.date))}.`:'Noch kein Training eingetragen – leg los, die Balken füllen sich mit jedem Satz.'}</p>`}
+$('#wPrev').onclick=()=>{wOff--;rOverview()};$('#wNext').onclick=()=>{if(wOff<0){wOff++;rOverview()}};
+/* Training */
+let D;try{D=JSON.parse(localStorage.getItem(LD))}catch(e){}
+const mkDraft=t=>({type:t,date:iso(new Date()),note:'',ex:S.plan[t].map(([id,n])=>({id,sets:Array.from({length:n},()=>({w:'',r:''}))}))});
+if(!D||!D.ex)D=mkDraft(nextType());
+const saveDraft=()=>{try{localStorage.setItem(LD,JSON.stringify(D))}catch(e){}};
+const touched=()=>D.ex.some(e=>e.sets.some(s=>s.w!==''||s.r!==''));
+let pendingType=null,trainMsg='';
+function rTraining(){const opts=[...Object.keys(EX),...Object.keys(S.custom)].sort((a,b)=>exName(a).localeCompare(exName(b),'de'));
+ $('#train').innerHTML=`<h2>Training eintragen</h2>
+ <div class="types">${ORDER.map(t=>`<button data-type="${t}" class="${D.type===t?'on':''}">${TY[t][0]}</button>`).join('')}</div>
+ ${pendingType?`<div class="msg">Deine Eingaben gehen verloren. <button class="sm" data-act="ctype">Trotzdem zu ${TY[pendingType][0]} wechseln</button> <button class="sm ghost" data-act="ntype">Abbrechen</button></div>`:''}
+ <div class="row" style="margin:14px 0 4px"><div><label for="tDate">Datum</label><input type="date" id="tDate" value="${esc(D.date)}"></div></div>
+ ${D.ex.map((e,i)=>{const l=lastSets(e.id);return `<div class="ex"><div class="exh"><b>${esc(exName(e.id))}</b><button class="sm ghost" data-act="rmex" data-i="${i}" aria-label="Übung entfernen">✕</button></div>
+  <div class="last">${l?`Letztes Mal (${dShort(parse(l.date))}): ${esc(setStr(l.s))}`:'Noch keine Werte – starte mit einem Gewicht, das du sauber schaffst.'}</div>
+  <div class="sets"><span class="h">Satz</span><span class="h">kg</span><span class="h">Wdh.</span><span></span>
+  ${e.sets.map((s,j)=>`<span class="n">${j+1}</span><input inputmode="decimal" aria-label="Gewicht Satz ${j+1}" data-i="${i}" data-j="${j}" data-f="w" value="${esc(s.w)}" placeholder="${l&&l.s[j]?fmt(l.s[j].w):'kg'}"><input inputmode="numeric" aria-label="Wiederholungen Satz ${j+1}" data-i="${i}" data-j="${j}" data-f="r" value="${esc(s.r)}" placeholder="${l&&l.s[j]?fmt(l.s[j].r):'Wdh.'}"><button class="sm ghost" data-act="rmset" data-i="${i}" data-j="${j}" aria-label="Satz löschen">−</button>`).join('')}</div>
+  <button class="sm" style="margin-top:8px" data-act="addset" data-i="${i}">+ Satz</button></div>`}).join('')}
+ <div class="row" style="margin-top:10px"><div><label for="addEx">Übung hinzufügen</label><select id="addEx"><option value="">Auswählen …</option>${opts.map(id=>`<option value="${esc(id)}">${esc(exName(id))}</option>`).join('')}<option value="__new">Eigene Übung anlegen …</option></select></div></div>
+ <div id="newEx" class="row" style="display:none;margin-top:8px"><div><label for="nxName">Name</label><input id="nxName" placeholder="z. B. Butterfly Maschine"></div><div><label for="nxM">Hauptmuskel</label><select id="nxM">${MG.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select></div><button data-act="newex" style="flex:0 0 auto">Anlegen</button></div>
+ <div style="margin-top:14px"><label for="tNote">Notiz (optional)</label><textarea id="tNote" placeholder="Wie lief's? Schlaf, Energie, Technik …">${esc(D.note)}</textarea></div>
+ ${trainMsg?`<div class="msg">${esc(trainMsg)}</div>`:''}
+ <div class="row" style="margin-top:14px"><button class="pri" data-act="save">Training speichern</button><button class="ghost" data-act="reset" style="flex:0 1 auto">Neu aus Plan laden</button></div>
+ <p class="small mut">Eingaben werden laufend als Entwurf gemerkt. Nur Sätze mit Wiederholungen zählen.</p>`}
+$('#train').addEventListener('input',ev=>{const t=ev.target;if(t.dataset.f){D.ex[t.dataset.i].sets[t.dataset.j][t.dataset.f]=t.value}else if(t.id==='tDate')D.date=t.value;else if(t.id==='tNote')D.note=t.value;saveDraft()});
+$('#train').addEventListener('change',ev=>{if(ev.target.id!=='addEx')return;const v=ev.target.value;if(v==='__new'){$('#newEx').style.display='flex';$('#nxName').focus();return}
+ if(v){D.ex.push({id:v,sets:[{w:'',r:''},{w:'',r:''},{w:'',r:''}]});saveDraft();rTraining()}});
+$('#train').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;const i=+b.dataset.i,j=+b.dataset.j;trainMsg='';
+ if(b.dataset.type){const t=b.dataset.type;if(t===D.type)return;if(touched()){pendingType=t}else{D=mkDraft(t);saveDraft()}rTraining();return}
+ switch(b.dataset.act){
+ case'ctype':D=mkDraft(pendingType);pendingType=null;saveDraft();break;
+ case'ntype':pendingType=null;break;
+ case'rmex':D.ex.splice(i,1);break;
+ case'addset':{const s=D.ex[i].sets,l=s[s.length-1];s.push({w:l?l.w:'',r:''});break}
+ case'rmset':D.ex[i].sets.splice(j,1);break;
+ case'newex':{const n=$('#nxName').value.trim();if(!n)return;const id='c'+Date.now().toString(36);S.custom[id]={n,m:{[$('#nxM').value]:1}};D.ex.push({id,sets:[{w:'',r:''},{w:'',r:''},{w:'',r:''}]});save();break}
+ case'reset':D=mkDraft(D.type);break;
+ case'save':{const sets=[];for(const e of D.ex)for(const s of e.sets)if(num(s.r)>0)sets.push({ex:e.id,w:num(s.w),r:num(s.r)});
+  if(!sets.length){trainMsg='Trag mindestens einen Satz mit Wiederholungen ein.';break}
+  S.workouts.push({id:Date.now().toString(36),date:D.date||iso(new Date()),type:D.type,sets,note:D.note.trim()});
+  D=mkDraft(nextType());saveDraft();save();location.hash='#uebersicht';renderAll();return}}
+ saveDraft();rTraining()});
+/* Verlauf */
+let confirmDel=null;
+function rHistory(){const ws=sorted();
+ $('#hist').innerHTML=`<h2>Verlauf</h2>`+(ws.length?ws.map(w=>{const vol=w.sets.reduce((a,s)=>a+s.w*s.r,0),by={};for(const s of w.sets)(by[s.ex]=by[s.ex]||[]).push(s);
+  return `<details><summary><span><b>${TY[w.type][0]}</b> · ${dShort(parse(w.date))}</span><span class="mut small">${w.sets.length} Sätze · ${fmt(vol)} kg bewegt</span></summary>
+  <table>${Object.entries(by).map(([id,s])=>`<tr><td>${esc(exName(id))}</td><td>${esc(setStr(s))}</td></tr>`).join('')}</table>
+  ${w.note?`<p class="small">${esc(w.note)}</p>`:''}<p><button class="sm ghost" data-del="${esc(w.id)}">${confirmDel===w.id?'Wirklich löschen?':'Löschen'}</button></p></details>`}).join(''):'<div class="empty">Noch keine Trainings. Dein erstes erscheint hier, sobald du es speicherst.</div>')}
+$('#hist').addEventListener('click',ev=>{const b=ev.target.closest('[data-del]');if(!b)return;const id=b.dataset.del;
+ if(confirmDel===id){S.workouts=S.workouts.filter(w=>w.id!==id);confirmDel=null;save();renderAll();return}confirmDel=id;b.textContent='Wirklich löschen?'});
+/* Plan + Erinnerung */
+const WD=['So','Mo','Di','Mi','Do','Fr','Sa'],BY=['SU','MO','TU','WE','TH','FR','SA'];
+const dayOrder=()=>[...S.settings.days].sort((a,b)=>(a+6)%7-(b+6)%7);
+function rPlan(){const all=[...Object.keys(EX),...Object.keys(S.custom)].sort((a,b)=>exName(a).localeCompare(exName(b),'de'));
+ $('#planCols').innerHTML=ORDER.map(t=>`<div class="card"><h3>${TY[t][0]}</h3><p class="small mut" style="margin:2px 0 10px">${TY[t][1]}</p>
+  <div class="prow small mut" style="border:0"><span>Übung</span><span>Sätze</span><span>Wdh.</span><span></span></div>
+  ${S.plan[t].map(([id,n,r],i)=>`<div class="prow"><span>${esc(exName(id))}</span><input inputmode="numeric" aria-label="Sätze" data-t="${t}" data-i="${i}" data-f="1" value="${n}"><input aria-label="Wiederholungen" data-t="${t}" data-i="${i}" data-f="2" value="${esc(r)}"><button class="sm ghost" data-rm="${t}" data-i="${i}" aria-label="Entfernen">✕</button></div>`).join('')}
+  <select data-add="${t}" style="margin-top:10px" aria-label="Übung zum ${TY[t][0]}-Tag hinzufügen"><option value="">+ Übung hinzufügen</option>${all.map(id=>`<option value="${esc(id)}">${esc(exName(id))}</option>`).join('')}</select></div>`).join('');
+ const s=S.settings,dO=dayOrder();
+ $('#remind').innerHTML=`<h3>Erinnerungen im Handy-Kalender</h3><p class="small mut">Wähle deine Trainingstage. Die Seite erstellt eine Kalender-Datei mit wöchentlichen Terminen und Erinnerung vorher – einmal importieren, fertig.</p>
+ <div class="days">${[1,2,3,4,5,6,0].map(d=>`<label><input type="checkbox" data-day="${d}" ${s.days.includes(d)?'checked':''}>${WD[d]}</label>`).join('')}</div>
+ <div class="row" style="margin-top:12px"><div><label for="rTime">Uhrzeit</label><input type="time" id="rTime" value="${esc(s.time)}"></div><div><label for="rAl">Erinnerung</label><select id="rAl">${[[15,'15 Min. vorher'],[30,'30 Min. vorher'],[60,'1 Std. vorher'],[120,'2 Std. vorher']].map(([v,l])=>`<option value="${v}" ${+s.alarm===v?'selected':''}>${l}</option>`).join('')}</select></div></div>
+ <ul class="pl">${dO.map((d,i)=>`<li><span>${WD[d]}, ${esc(s.time)} Uhr</span><span>${TY[ORDER[i%3]][0]}-Tag</span></li>`).join('')||'<li>Keine Tage gewählt</li>'}</ul>
+ <div class="row" style="margin-top:12px"><button class="pri" id="icsDl">Kalender-Datei laden (.ics)</button><button id="icsCp">Als Text kopieren</button></div><div id="icsOut"></div>
+ <p class="small mut"><b>iPhone:</b> Datei öffnen → „Alle hinzufügen“. <b>Android:</b> Datei mit Google Kalender öffnen oder auf calendar.google.com → Einstellungen → Importieren.</p>`}
+$('#planCols').addEventListener('change',ev=>{const e=ev.target;
+ if(e.dataset.add){if(e.value)S.plan[e.dataset.add].push([e.value,3,'8–12']);save();rPlan();rOverview();return}
+ if(e.dataset.f){const row=S.plan[e.dataset.t][e.dataset.i];row[+e.dataset.f]=e.dataset.f==='1'?Math.max(1,Math.round(num(e.value))||1):e.value.trim();save();rOverview()}});
+$('#planCols').addEventListener('click',ev=>{const b=ev.target.closest('[data-rm]');if(!b)return;S.plan[b.dataset.rm].splice(+b.dataset.i,1);save();rPlan();rOverview()});
+$('#remind').addEventListener('change',ev=>{const e=ev.target,s=S.settings;
+ if(e.dataset.day){const d=+e.dataset.day;s.days=e.checked?[...new Set([...s.days,d])]:s.days.filter(x=>x!==d)}else if(e.id==='rTime')s.time=e.value||'18:00';else if(e.id==='rAl')s.alarm=+e.value;else return;save();rPlan();rOverview()});
+function ics(){const s=S.settings,p=n=>String(n).padStart(2,'0'),f=d=>`${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}T${p(d.getHours())}${p(d.getMinutes())}00`;
+ const ix=t=>t.replace(/\\/g,'\\\\').replace(/[,;]/g,m=>'\\'+m),fold=l=>{let o='';while(l.length>60){o+=l.slice(0,60)+'\r\n ';l=l.slice(60)}return o+l};
+ const now=new Date(),stamp=now.toISOString().replace(/[-:]/g,'').slice(0,15)+'Z',[hh,mm]=s.time.split(':').map(Number);
+ const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Gymlog//DE','CALSCALE:GREGORIAN','METHOD:PUBLISH'];
+ dayOrder().forEach((d,i)=>{const t=ORDER[i%3],st=new Date();st.setHours(hh,mm,0,0);st.setDate(st.getDate()+((d-st.getDay()+7)%7));if(st<now)st.setDate(st.getDate()+7);
+  const en=new Date(st.getTime()+75*60000),desc=S.plan[t].map(([id,n,r])=>`${exName(id)} ${n}×${r}`).join('\\n');
+  L.push('BEGIN:VEVENT',`UID:gymlog-${BY[d]}-${stamp}@gymlog`,'DTSTAMP:'+stamp,'DTSTART:'+f(st),'DTEND:'+f(en),'RRULE:FREQ=WEEKLY;BYDAY='+BY[d],'SUMMARY:'+ix(`Gym – ${TY[t][0]}-Tag`),'DESCRIPTION:'+desc.split('\\n').map(ix).join('\\n'),'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+ix(`Gleich Gym: ${TY[t][0]}-Tag`),`TRIGGER:-PT${s.alarm}M`,'END:VALARM','END:VEVENT')});
+ L.push('END:VCALENDAR');return L.map(fold).join('\r\n')}
+$('#remind').addEventListener('click',async ev=>{const b=ev.target.closest('button');if(!b)return;const txt=ics(),out=$('#icsOut');
+ if(b.id==='icsDl'){download('gym-erinnerungen.ics',txt,'text/calendar');out.innerHTML='<div class="msg">Datei geladen. Öffnen und in den Kalender importieren.</div>'}
+ if(b.id==='icsCp'){try{await navigator.clipboard.writeText(txt);out.innerHTML='<div class="msg">Kopiert. In eine Textdatei <b>gym.ics</b> einfügen und importieren.</div>'}catch(e){out.innerHTML='<pre></pre>';out.firstChild.textContent=txt}}});
+/* Ernährung */
+const MEALS=[['Frühstück','Overnight Oats mit Skyr & Beeren',540,43],['Mittag','Teriyaki-Hähnchen-Bowl',640,48],['Snack','Quark-Bowl mit Banane & Nüssen',390,35],['Abend','Chili con carne mit Reis',620,42]];
+const ADD=[['2 Scheiben Vollkornbrot + 20 g Erdnussbutter',330,13],['500 ml Milch (3,5 %)',320,17],['30 g Nüsse',190,6],['50 g Reis (roh) extra zur Mahlzeit',175,4],['1 Banane',100,1]];
+function rFood(){const s=S.settings,bmr=10*s.weight+6.25*s.height-5*s.age+(s.sex==='m'?5:-161),tdee=bmr*s.act,kcal=Math.round((tdee+ +s.surplus)/50)*50,
+ pr=Math.round(s.weight*2),fat=Math.round(s.weight*.9),carb=Math.max(0,Math.round((kcal-pr*4-fat*9)/4));
+ $('#calc').innerHTML=`<h2>Dein Tagesziel</h2>
+ <div class="big"><div><b>${fmt(kcal)}</b><span>kcal pro Tag</span></div><div><b>${pr} g</b><span>Eiweiß</span></div><div><b>${carb} g</b><span>Kohlenhydrate</span></div><div><b>${fat} g</b><span>Fett</span></div></div>
+ <div class="row">${[['sex','Geschlecht','sel',[['m','männlich'],['w','weiblich']]],['age','Alter','n'],['height','Größe (cm)','n'],['weight','Gewicht (kg)','n']].map(([k,l,t,o])=>`<div><label for="f-${k}">${l}</label>${t==='sel'?`<select id="f-${k}"="${k}">${o.map(([v,x])=>`<option value="${v}" ${s[k]===v?'selected':''}>${x}</option>`).join('')}</select>`:`<input id="f-${k}"="${k}" inputmode="decimal" value="${esc(s[k])}">`}</div>`).join('')}</div>
+ <div class="row" style="margin-top:10px"><div><label for="f-act">Alltag</label><select id="f-act"="act">${[[1.375,'Bürojob + 3× Training'],[1.5,'teils aktiv + 3× Training'],[1.65,'körperliche Arbeit + Training']].map(([v,x])=>`<option value="${v}" ${Math.abs(s.act-v)<.06?'selected':''}>${x}</option>`).join('')}</select></div><div><label for="f-sur">Überschuss</label><select id="f-sur"="surplus">${[[150,'+150 kcal (sehr sauber)'],[250,'+250 kcal (empfohlen)'],[400,'+400 kcal (schneller, mehr Fett)']].map(([v,x])=>`<option value="${v}" ${+s.surplus===v?'selected':''}>${x}</option>`).join('')}</select></div></div>
+ <p class="small mut">Grundumsatz nach Mifflin-St Jeor × Aktivität + leichter Überschuss; Eiweiß 2 g/kg. Richtwerte: Nimmst du über 3–4 Wochen nicht ca. 0,25–0,5 % Körpergewicht pro Woche zu, +100–150 kcal; nimmst du schneller zu, etwas runter. Wiege dich dafür morgens und schau auf den Wochenschnitt.</p>`;
+ const sum=MEALS.reduce((a,m)=>[a[0]+m[2],a[1]+m[3]],[0,0]);let gap=kcal-sum[0];const sug=[];for(const a of ADD)if(gap>60){sug.push(a);gap-=a[1]}
+ $('#day').innerHTML=`<h3>Beispieltag aus dem Mealprep</h3><div class="meal small mut" style="border:0"><span></span><span>kcal</span><span>Eiweiß</span></div>
+ ${MEALS.map(m=>`<div class="meal"><div><b>${m[0]}</b><br><span class="small mut" style="text-align:left">${m[1]}</span></div><span>${m[2]}</span><span>${m[3]} g</span></div>`).join('')}
+ <div class="meal"><b>Summe</b><span><b>${fmt(sum[0])}</b></span><span><b>${sum[1]} g</b></span></div>
+ ${kcal-sum[0]>60?`<p><b>Noch ${fmt(kcal-sum[0])} kcal bis zum Ziel</b> – zum Beispiel:</p><ul>${sug.map(a=>`<li>${a[0]} <span class="mut">(≈ ${a[1]} kcal, ${a[2]} g Eiweiß)</span></li>`).join('')}</ul>`:`<p class="mut">Passt ziemlich genau zu deinem Ziel. ${sum[0]-kcal>150?'Wenn es zu viel ist: Reis-Portionen etwas kleiner machen.':''}</p>`}
+ <p class="small mut">Eiweiß im Beispieltag: ${sum[1]} g von ${pr} g Ziel. Alle Nährwerte sind gerundete Richtwerte.</p>`}
+$('#calc').addEventListener('change',ev=>{const k=ev.target.dataset.k;if(!k)return;const v=ev.target.value;S.settings[k]=k==='sex'?v:num(v)||DEF.settings[k];save();rFood()});
+const REC=[['Teriyaki-Hähnchen-Bowl','4 Boxen · ≈ 640 kcal, 48 g Eiweiß pro Box',['600 g Hähnchenbrust','320 g Reis (roh)','800 g Brokkoli (TK geht)','2 EL Öl','4 EL Sojasauce, 1 EL Honig','2 Knoblauchzehen, 1 Stück Ingwer, Sesam'],['Reis kochen.','Hähnchen würfeln und in Öl 6–8 Min. scharf anbraten.','Sojasauce, Honig, Knoblauch und Ingwer dazu, 2 Min. einkochen.','Brokkoli 5 Min. dämpfen, alles auf 4 Boxen verteilen, Sesam drüber.'],'Kühlschrank 3 Tage – Box 4 einfrieren.'],
+ ['Chili con carne','4 Portionen · ≈ 620 kcal, 42 g Eiweiß',['500 g Rinderhack (5 % Fett)','1 Dose Kidneybohnen, 1 Dose Mais','700 g passierte Tomaten','2 Paprika, 2 Zwiebeln','Kreuzkümmel, Paprikapulver, Chili, Salz','280 g Reis (roh)'],['Zwiebeln und Hack krümelig anbraten, Gewürze kurz mitrösten.','Paprika, Tomaten, abgespülte Bohnen und Mais dazu.','20–30 Min. köcheln lassen, Reis nebenher kochen.','Abfüllen – friert sich super ein.'],'Kühlschrank 4 Tage, eingefroren 3 Monate.'],
+ ['Overnight Oats','4 Gläser · ≈ 540 kcal, 43 g Eiweiß',['240 g Haferflocken','1 kg Magerquark oder Skyr','600 ml Milch','400 g Beeren (TK)','40 g Honig, Zimt'],['Quark, Milch, Honig und Zimt glatt rühren.','Haferflocken unterrühren, auf 4 Gläser verteilen.','Beeren obendrauf, über Nacht in den Kühlschrank.'],'Hält 4 Tage.'],
+ ['Linsen-Tofu-Curry (vegetarisch)','4 Portionen · ≈ 670 kcal, 36 g Eiweiß',['280 g rote Linsen','400 g Tofu natur','250 ml Kokosmilch light','400 g gehackte Tomaten','200 g Blattspinat','2 EL Currypaste, 1 Zwiebel','240 g Reis (roh)'],['Tofu würfeln und knusprig anbraten, beiseite stellen.','Zwiebel und Currypaste anschwitzen, Linsen, Tomaten, Kokosmilch und 400 ml Wasser dazu.','15 Min. köcheln, Spinat und Tofu unterheben. Reis dazu.'],'Kühlschrank 4 Tage, gut einfrierbar.']];
+const SHOP=['Hähnchenbrust 600 g','Rinderhack 5 % 500 g','Tofu natur 400 g','Magerquark/Skyr 2,75 kg (Oats + Snacks)','Milch 1 l','Reis 850 g','Haferflocken 500 g','Rote Linsen 280 g','Kidneybohnen 1 Dose, Mais 1 Dose','Passierte Tomaten 700 g, gehackte Tomaten 400 g','Kokosmilch light 250 ml','Brokkoli 800 g, Spinat 200 g, 2 Paprika, 3 Zwiebeln','Beeren TK 400 g, 7 Bananen','Nüsse 150 g','Sojasauce, Honig, Currypaste, Gewürze, Knoblauch, Ingwer'];
+function rPrep(){$('#prep').innerHTML=`<h2>Mealprep-Woche</h2>
+ <ul class="pl"><li><span><b>Sonntag</b> (≈ 90 Min.)<br><span class="small mut">Reis für alles, Hähnchen-Bowls, Chili, Overnight Oats für Mo–Do</span></span><span>Mo–Mi</span></li>
+ <li><span><b>Mittwochabend</b> (≈ 40 Min.)<br><span class="small mut">Linsen-Curry, neue Oats; Chili aus dem Gefrierfach</span></span><span>Do–Sa</span></li>
+ <li><span><b>Täglich</b> (2 Min.)<br><span class="small mut">Quark-Bowl: 250 g Magerquark, 1 Banane, 20 g Nüsse</span></span><span>390 kcal</span></li></ul>
+ ${REC.map(([n,m,ing,st,k])=>`<details class="recipe"><summary>${n}</summary><p class="small mut" style="margin:4px 0">${m}</p><ul>${ing.map(x=>`<li>${x}</li>`).join('')}</ul><ol>${st.map(x=>`<li>${x}</li>`).join('')}</ol><p class="small mut">${k}</p></details>`).join('')}
+ <details class="recipe"><summary>Einkaufsliste für die Woche</summary><ul>${SHOP.map(x=>`<li>${x}</li>`).join('')}</ul><button class="sm" id="shopCp">Liste kopieren</button> <span class="small mut" id="shopMsg"></span></details>
+ <p class="small mut">Tipp: Am Trainingstag eine Mahlzeit mit Kohlenhydraten und Eiweiß 1–3 Std. vor dem Gym. Wichtiger als das Timing ist, dass du über den Tag dein Eiweiß- und Kalorienziel erreichst. Keine medizinische Beratung – bei Vorerkrankungen bitte mit Arzt oder Ärztin abklären.</p>`}
+$('#prep').addEventListener('click',async ev=>{if(ev.target.id!=='shopCp')return;try{await navigator.clipboard.writeText(SHOP.map(x=>'- '+x).join('\n'));$('#shopMsg').textContent='Kopiert ✓'}catch(e){$('#shopMsg').textContent='Kopieren nicht erlaubt – bitte markieren.'}});
+/* Routing */
+const VIEWS=['uebersicht','training','verlauf','plan','essen'];
+function route(){const h=location.hash.slice(1),v=VIEWS.includes(h)?h:'uebersicht';
+ for(const x of VIEWS)document.getElementById('v-'+x).classList.toggle('on',x===v);
+ document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+v))}
+function renderAll(){rOverview();rTraining();rHistory();rPlan();rFood();rPrep();route()}
+addEventListener('hashchange',()=>{route();scrollTo(0,0)});
+renderAll();
+status(S.workouts.length?`${S.workouts.length} Trainings auf diesem Gerät gespeichert`:'Daten bleiben auf diesem Gerät gespeichert');
+$('#bkExp').onclick=()=>{download(`gymlog-backup-${iso(new Date())}.json`,JSON.stringify(S,null,1),'application/json');$('#bkMsg').innerHTML='<div class="msg">Backup geladen.</div>'};
+let pendingImport=null;
+$('#bkFile').onchange=async ev=>{const f=ev.target.files[0];if(!f)return;ev.target.value='';const m=$('#bkMsg');
+ try{const d=JSON.parse(await f.text());if(!d.plan||!Array.isArray(d.workouts))throw 0;pendingImport=d;
+  m.innerHTML=`<div class="msg">Backup mit ${d.workouts.length} Trainings gefunden. Es ersetzt die aktuellen Daten (${S.workouts.length} Trainings). <button class="sm pri" id="bkOk">Ersetzen</button> <button class="sm ghost" id="bkNo">Abbrechen</button></div>`}
+ catch(e){m.innerHTML='<div class="msg">Das ist keine gültige Gymlog-Backup-Datei.</div>'}};
+$('#bkMsg').addEventListener('click',ev=>{if(ev.target.id==='bkOk'&&pendingImport){S=norm(pendingImport);pendingImport=null;save();renderAll();$('#bkMsg').innerHTML='<div class="msg">Backup eingespielt ✓</div>'}else if(ev.target.id==='bkNo'){pendingImport=null;$('#bkMsg').innerHTML=''}});
+if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
+const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+if(!standalone){let hide=false;try{hide=localStorage.getItem('gymlog-hint')==='x'}catch(e){}
+ if(!hide){const ios=/iphone|ipad|ipod/i.test(navigator.userAgent),el=$('#install');el.style.display='block';
+  el.innerHTML=`<b>Als App installieren:</b> ${ios?'In Safari auf Teilen ⬆︎ → „Zum Home-Bildschirm“.':'Im Browser-Menü ⋮ → „App installieren“ bzw. „Zum Startbildschirm hinzufügen“.'} <button class="sm ghost" id="hintX">Ausblenden</button>`;
+  $('#hintX').onclick=()=>{el.style.display='none';try{localStorage.setItem('gymlog-hint','x')}catch(e){}}}}
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+</script>
+</body>
+</html>
