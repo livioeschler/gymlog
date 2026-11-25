@@ -316,7 +316,7 @@ function rRemind(){const s=S.settings,r=rem(),dO=dayOrder();
  <div class="row"><div style="flex:2 1 200px"><label for="cText">Text</label><input id="cText" maxlength="80" placeholder="z. B. Kreatin nehmen"></div><div><label for="cTime">Uhrzeit</label><input type="time" id="cTime" value="08:00"></div></div>
  <div style="margin-top:8px">${dayBoxes('data-cday',WEEK)}</div><div id="cMsg"></div>
  <button style="margin-top:10px" id="cAdd">+ Erinnerung hinzufügen</button>
- <p class="small mut">Zeiten werden alle 15 Minuten geprüft. Mitteilungen kommen auf jedes Gerät, auf dem du sie aktiviert hast.</p>
+ <p class="small mut">Mitteilungen kommen pünktlich zur eingestellten Minute –  auf jedes Gerät, auf dem du sie aktiviert hast.</p>
  <details class="recipe"><summary>Alternativ: Kalender-Datei (.ics)</summary>
  <p class="small mut">Wöchentliche Termine für deine Trainingstage mit Kalender-Erinnerung – unabhängig von Push.</p>
  <div class="row"><div><label for="rAl">Kalender-Erinnerung</label><select id="rAl">${[[15,'15 Min. vorher'],[30,'30 Min. vorher'],[60,'1 Std. vorher'],[120,'2 Std. vorher']].map(([v,l])=>`<option value="${v}" ${+s.alarm===v?'selected':''}>${l}</option>`).join('')}</select></div></div>

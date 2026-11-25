@@ -1,6 +1,6 @@
 // Supabase Edge Function: water-reminder (verschickt alle Gymlog-Erinnerungen)
-// Wird alle 15 Minuten per pg_cron aufgerufen und prüft für jedes Konto,
-// welche Erinnerungen in diesem 15-Minuten-Fenster fällig sind (Zeitzone Europe/Berlin).
+// Wird jede Minute per pg_cron aufgerufen und prüft für jedes Konto,
+// welche Erinnerungen genau jetzt fällig sind (Zeitzone Europe/Berlin).
 //
 // Benötigte Secrets: VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, CRON_SECRET (optional VAPID_CONTACT)
 // "Verify JWT" für diese Funktion ausschalten – geschützt wird sie über den Header x-cron-secret.
@@ -49,8 +49,8 @@ function berlinNow() {
 
 function remindersFor(data: Any, now: ReturnType<typeof berlinNow>): Msg[] {
   const s = data?.settings ?? {}, r = { ...RDEF, ...(s.rem ?? {}) };
-  const slot = now.h * 60 + now.mi - (now.mi % 15);
-  const due = (min: number) => min >= slot && min < slot + 15;
+  const nowMin = now.h * 60 + now.mi;
+  const due = (min: number) => min === nowMin;
   const days: number[] = s.days ?? [1, 3, 5];
   const workouts: Any[] = data?.workouts ?? [];
   const trainDay = days.includes(now.dow);
@@ -66,7 +66,7 @@ function remindersFor(data: Any, now: ReturnType<typeof berlinNow>): Msg[] {
     out.push({ tag: "missed", title: "Training eingetragen?", body: `Heute ist ${LBL[next]}-Tag und noch nichts eingetragen. Trag es ein, solange du die Gewichte noch weißt.`, url: "./#training" });
   }
   const share = WATER_CHECKS[now.h];
-  if (r.water?.on !== false && share !== undefined && now.mi < 15) {
+  if (r.water?.on !== false && share !== undefined && now.mi === 0) {
     const ml = Number((data?.water ?? {})[now.today] ?? 0);
     const train = trainDay || doneToday;
     const goal = Number(s.waterCustom) > 0 ? Math.round(Number(s.waterCustom) * 1000)

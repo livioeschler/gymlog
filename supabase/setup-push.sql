@@ -16,10 +16,10 @@ grant select, insert, update, delete on public.push_subs to authenticated;
 grant select, insert, update, delete on public.gymlog_state to authenticated;
 grant all on public.push_subs, public.gymlog_state to service_role;
 
--- Aufruf alle 15 Minuten (die Funktion entscheidet selbst, welche Erinnerungen fällig sind)
+-- Aufruf jede Minute (die Funktion entscheidet selbst, welche Erinnerungen fällig sind)
 create extension if not exists pg_cron;
 create extension if not exists pg_net;
-select cron.schedule('wasser-erinnerung', '*/15 * * * *', $$
+select cron.schedule('wasser-erinnerung', '* * * * *', $$
   select net.http_post(
     url := 'https://vnshuumevvdcyukwswgd.supabase.co/functions/v1/water-reminder',
     headers := '{"Content-Type":"application/json","x-cron-secret":"CRON_SECRET_HIER_EINSETZEN"}'::jsonb,
