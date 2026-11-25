@@ -1,0 +1,2 @@
+[functions.water-reminder]
+verify_jwt = false

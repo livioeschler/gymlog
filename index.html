@@ -76,7 +76,7 @@ label{font-size:14px;color:var(--mut);display:block}
 .sets .h{font-size:13px;color:var(--mut)}
 .sets .n{font-weight:600;color:var(--mut);text-align:center}
 .types{display:flex;gap:8px;flex-wrap:wrap}
-.types button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.types button.on,.types .sm.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
 .row>*{flex:1 1 140px}
 .next{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
@@ -157,7 +157,7 @@ pre{overflow-x:auto;white-space:pre-wrap;font-size:13px;background:var(--soft);p
       <li><b>Aufwärmen:</b> 2–3 leichtere Sätze vor der ersten Übung zählen nicht als Arbeitssätze – nicht eintragen.</li>
       <li><b>Verpasstes Training?</b> Einfach mit dem nächsten Tag der Reihe weitermachen – die Übersicht schlägt ihn automatisch vor.</li></ul></div></div>
   </section>
-  <section id="v-essen"><div class="grid two"><div><div class="card" id="calc"></div><div class="card" style="margin-top:22px" id="day"></div></div><div class="card" id="prep"></div></div></section>
+  <section id="v-essen"><div class="grid two"><div><div class="card" id="water"></div><div class="card" style="margin-top:22px" id="calc"></div><div class="card" style="margin-top:22px" id="day"></div></div><div class="card" id="prep"></div></div></section>
 </div></main>
 <script src="vendor/supabase.js"></script>
 <script>
@@ -176,7 +176,7 @@ const DEF={updated:0,settings:{days:[1,3,5],time:'18:00',alarm:30,sex:'m',age:25
   pull:[['lat',4,'6–10'],['rud',3,'8–10'],['krud',3,'10–12'],['face',3,'15'],['curl',3,'8–12'],['hammer',2,'10–12']],
   legs:[['squat',4,'6–8'],['rdl',3,'8–10'],['press',3,'10–12'],['lc',3,'10–12'],['calf',4,'12–15'],['crunch',3,'12–15']]},custom:{},workouts:[]};
 const clone=o=>JSON.parse(JSON.stringify(o));
-const norm=s=>{if(!s||!s.plan)s=clone(DEF);s.settings={...DEF.settings,...s.settings};s.custom=s.custom||{};s.workouts=s.workouts||[];s.deleted=s.deleted||[];return s};
+const norm=s=>{if(!s||!s.plan)s=clone(DEF);s.settings={...DEF.settings,...s.settings};s.custom=s.custom||{};s.workouts=s.workouts||[];s.deleted=s.deleted||[];s.water=s.water||{};return s};
 function load(){let b=null;try{b=JSON.parse(localStorage.getItem(LS))}catch(e){}return norm(b)}
 let S=load();
 const exName=id=>EX[id]?.[0]||S.custom[id]?.n||id, exM=id=>EX[id]?.[1]||S.custom[id]?.m||{};
@@ -309,26 +309,84 @@ function rFood(){const s=S.settings,bmr=10*s.weight+6.25*s.height-5*s.age+(s.sex
  ${kcal-sum[0]>60?`<p><b>Noch ${fmt(kcal-sum[0])} kcal bis zum Ziel</b> – zum Beispiel:</p><ul>${sug.map(a=>`<li>${a[0]} <span class="mut">(≈ ${a[1]} kcal, ${a[2]} g Eiweiß)</span></li>`).join('')}</ul>`:`<p class="mut">Passt ziemlich genau zu deinem Ziel. ${sum[0]-kcal>150?'Wenn es zu viel ist: Reis-Portionen etwas kleiner machen.':''}</p>`}
  <p class="small mut">Eiweiß im Beispieltag: ${sum[1]} g von ${pr} g Ziel. Alle Nährwerte sind gerundete Richtwerte.</p>`}
 $('#calc').addEventListener('change',ev=>{const k=ev.target.dataset.k;if(!k)return;const v=ev.target.value;S.settings[k]=k==='sex'?v:num(v)||DEF.settings[k];save();rFood()});
-const REC=[['Teriyaki-Hähnchen-Bowl','4 Boxen · ≈ 640 kcal, 48 g Eiweiß pro Box',['600 g Hähnchenbrust','320 g Reis (roh)','800 g Brokkoli (TK geht)','2 EL Öl','4 EL Sojasauce, 1 EL Honig','2 Knoblauchzehen, 1 Stück Ingwer, Sesam'],['Reis kochen.','Hähnchen würfeln und in Öl 6–8 Min. scharf anbraten.','Sojasauce, Honig, Knoblauch und Ingwer dazu, 2 Min. einkochen.','Brokkoli 5 Min. dämpfen, alles auf 4 Boxen verteilen, Sesam drüber.'],'Kühlschrank 3 Tage – Box 4 einfrieren.'],
- ['Chili con carne','4 Portionen · ≈ 620 kcal, 42 g Eiweiß',['500 g Rinderhack (5 % Fett)','1 Dose Kidneybohnen, 1 Dose Mais','700 g passierte Tomaten','2 Paprika, 2 Zwiebeln','Kreuzkümmel, Paprikapulver, Chili, Salz','280 g Reis (roh)'],['Zwiebeln und Hack krümelig anbraten, Gewürze kurz mitrösten.','Paprika, Tomaten, abgespülte Bohnen und Mais dazu.','20–30 Min. köcheln lassen, Reis nebenher kochen.','Abfüllen – friert sich super ein.'],'Kühlschrank 4 Tage, eingefroren 3 Monate.'],
- ['Overnight Oats','4 Gläser · ≈ 540 kcal, 43 g Eiweiß',['240 g Haferflocken','1 kg Magerquark oder Skyr','600 ml Milch','400 g Beeren (TK)','40 g Honig, Zimt'],['Quark, Milch, Honig und Zimt glatt rühren.','Haferflocken unterrühren, auf 4 Gläser verteilen.','Beeren obendrauf, über Nacht in den Kühlschrank.'],'Hält 4 Tage.'],
- ['Linsen-Tofu-Curry (vegetarisch)','4 Portionen · ≈ 670 kcal, 36 g Eiweiß',['280 g rote Linsen','400 g Tofu natur','250 ml Kokosmilch light','400 g gehackte Tomaten','200 g Blattspinat','2 EL Currypaste, 1 Zwiebel','240 g Reis (roh)'],['Tofu würfeln und knusprig anbraten, beiseite stellen.','Zwiebel und Currypaste anschwitzen, Linsen, Tomaten, Kokosmilch und 400 ml Wasser dazu.','15 Min. köcheln, Spinat und Tofu unterheben. Reis dazu.'],'Kühlschrank 4 Tage, gut einfrierbar.']];
+const REC=[['Teriyaki-Hähnchen-Bowl','4 Boxen · ≈ 640 kcal, 48 g Eiweiß pro Box',['600 g Hähnchenbrust','320 g Reis (roh)','800 g Brokkoli (TK geht)','2 EL Öl','4 EL Sojasauce, 1 EL Honig','2 Knoblauchzehen, 1 Stück Ingwer, Sesam'],['Reis kochen.','Hähnchen würfeln und in Öl 6–8 Min. scharf anbraten.','Sojasauce, Honig, Knoblauch und Ingwer dazu, 2 Min. einkochen.','Brokkoli 5 Min. dämpfen, alles auf 4 Boxen verteilen, Sesam drüber.'],'Kühlschrank 3 Tage – Box 4 einfrieren.','Mittag/Abend'],
+ ['Chili con carne','4 Portionen · ≈ 620 kcal, 42 g Eiweiß',['500 g Rinderhack (5 % Fett)','1 Dose Kidneybohnen, 1 Dose Mais','700 g passierte Tomaten','2 Paprika, 2 Zwiebeln','Kreuzkümmel, Paprikapulver, Chili, Salz','280 g Reis (roh)'],['Zwiebeln und Hack krümelig anbraten, Gewürze kurz mitrösten.','Paprika, Tomaten, abgespülte Bohnen und Mais dazu.','20–30 Min. köcheln lassen, Reis nebenher kochen.','Abfüllen – friert sich super ein.'],'Kühlschrank 4 Tage, eingefroren 3 Monate.','Mittag/Abend'],
+ ['Overnight Oats','4 Gläser · ≈ 540 kcal, 43 g Eiweiß',['240 g Haferflocken','1 kg Magerquark oder Skyr','600 ml Milch','400 g Beeren (TK)','40 g Honig, Zimt'],['Quark, Milch, Honig und Zimt glatt rühren.','Haferflocken unterrühren, auf 4 Gläser verteilen.','Beeren obendrauf, über Nacht in den Kühlschrank.'],'Hält 4 Tage.','Frühstück'],
+ ['Linsen-Tofu-Curry (vegetarisch)','4 Portionen · ≈ 670 kcal, 36 g Eiweiß',['280 g rote Linsen','400 g Tofu natur','250 ml Kokosmilch light','400 g gehackte Tomaten','200 g Blattspinat','2 EL Currypaste, 1 Zwiebel','240 g Reis (roh)'],['Tofu würfeln und knusprig anbraten, beiseite stellen.','Zwiebel und Currypaste anschwitzen, Linsen, Tomaten, Kokosmilch und 400 ml Wasser dazu.','15 Min. köcheln, Spinat und Tofu unterheben. Reis dazu.'],'Kühlschrank 4 Tage, gut einfrierbar.','Mittag/Abend'],
+ ['Griechische Hähnchen-Bowl mit Skyr-Tzatziki','4 Portionen · ≈ 580 kcal, 59 g Eiweiß',['600 g Hähnchenbrust','280 g Bulgur','400 g Skyr, 1 Knoblauchzehe, Dill','1 Gurke, 250 g Cherrytomaten, 1 rote Zwiebel','100 g Feta','1 EL Olivenöl, Oregano, Zitrone'],['Bulgur mit doppelter Menge Wasser 10 Min. quellen lassen.','Hähnchen in Streifen mit Oregano, Zitrone und Öl anbraten.','Halbe Gurke reiben, mit Skyr und Knoblauch zum Tzatziki rühren.','Rest Gurke, Tomaten, Zwiebel würfeln, alles in Boxen schichten, Feta drüber. Tzatziki separat.'],'Kühlschrank 3 Tage.','Mittag/Abend'],
+ ['Bolognese mit Linsen','4 Portionen · ≈ 675 kcal, 47 g Eiweiß',['400 g Vollkornpasta','400 g Rinderhack (5 % Fett)','100 g rote Linsen','700 g passierte Tomaten','1 Zwiebel, 2 Karotten, 1 EL Öl','40 g Parmesan, Oregano, Salz, Pfeffer'],['Zwiebel und Karotten fein würfeln, in Öl anschwitzen, Hack krümelig mitbraten.','Linsen, Tomaten und 200 ml Wasser dazu, 20 Min. köcheln.','Pasta kochen, mit Sauce mischen, Parmesan drüber.'],'Kühlschrank 4 Tage, Sauce gut einfrierbar.','Mittag/Abend'],
+ ['Puten-Burrito-Bowl','4 Portionen · ≈ 600 kcal, 35 g Eiweiß',['500 g Putenhack','280 g Reis (roh)','1 Dose schwarze Bohnen, 1 Dose Mais','200 g Salsa (Glas)','1 Avocado, 1 Limette','Kreuzkümmel, Paprikapulver, Chili'],['Reis mit etwas Limettensaft kochen.','Putenhack mit den Gewürzen anbraten.','Bohnen und Mais abspülen, alles auf Boxen verteilen, Salsa dazu.','Avocado erst beim Essen aufschneiden.'],'Kühlschrank 3–4 Tage.','Mittag/Abend'],
+ ['Ofen-Lachs mit Kartoffeln & Gemüse','4 Portionen · ≈ 525 kcal, 32 g Eiweiß',['4 Lachsfilets à 125 g','1 kg Kartoffeln','2 Zucchini, 2 Paprika','2 EL Olivenöl','Zitrone, Dill, Salz, Pfeffer'],['Ofen auf 200 °C. Kartoffeln vierteln, mit 1 EL Öl 20 Min. backen.','Gemüse in Stücke, dazu aufs Blech, Lachs obendrauf, Rest Öl, Zitrone, Gewürze.','Weitere 15 Min. backen.'],'Kühlschrank 2 Tage – Fisch am besten frisch essen.','Mittag/Abend'],
+ ['Protein-Pancakes','2 Portionen · ≈ 575 kcal, 37 g Eiweiß',['120 g Haferflocken','250 g Magerquark','4 Eier','1 reife Banane','100 ml Milch, 1 TL Backpulver','etwas Öl für die Pfanne'],['Alles im Mixer oder mit dem Pürierstab glatt mixen.','Kleine Pancakes in wenig Öl bei mittlerer Hitze von beiden Seiten backen.','Mit Beeren oder Skyr servieren.'],'Kühlschrank 3 Tage, kurz im Toaster aufwärmen.','Frühstück'],
+ ['Ei-Muffins mit Gemüse & Schinken','12 Stück = 4 Portionen à 3 · ≈ 300 kcal, 30 g Eiweiß',['10 Eier','200 g Hüttenkäse','100 g Kochschinken','1 Paprika, 100 g Spinat','50 g geriebener Käse','Salz, Pfeffer'],['Ofen auf 180 °C, Muffinform einfetten.','Eier mit Hüttenkäse verquirlen, Schinken und Gemüse klein schneiden und unterheben.','In 12 Mulden füllen, Käse drüber, 20–22 Min. backen.'],'Kühlschrank 4 Tage – ideal zum Mitnehmen.','Frühstück'],
+ ['Erdnuss-Protein-Bällchen','16 Stück = 8 Portionen à 2 · ≈ 210 kcal, 12 g Eiweiß',['120 g Haferflocken','60 g Proteinpulver (Vanille oder Schoko)','120 g Erdnussmus','60 g Honig','2–4 EL Milch'],['Alles verkneten, bis ein formbarer Teig entsteht (bei Bedarf mehr Milch).','16 Kugeln rollen, 30 Min. kühlen.'],'Kühlschrank 1 Woche – guter Snack vor dem Training.','Snack'],
+ ['Quark-Bowl','1 Portion · ≈ 390 kcal, 35 g Eiweiß',['250 g Magerquark','1 Banane','20 g Nüsse','Zimt, nach Wunsch etwas Honig'],['Quark glatt rühren, Banane schneiden, Nüsse und Zimt drüber.'],'Frisch in 2 Minuten.','Snack']
+];
 const SHOP=['Hähnchenbrust 600 g','Rinderhack 5 % 500 g','Tofu natur 400 g','Magerquark/Skyr 2,75 kg (Oats + Snacks)','Milch 1 l','Reis 850 g','Haferflocken 500 g','Rote Linsen 280 g','Kidneybohnen 1 Dose, Mais 1 Dose','Passierte Tomaten 700 g, gehackte Tomaten 400 g','Kokosmilch light 250 ml','Brokkoli 800 g, Spinat 200 g, 2 Paprika, 3 Zwiebeln','Beeren TK 400 g, 7 Bananen','Nüsse 150 g','Sojasauce, Honig, Currypaste, Gewürze, Knoblauch, Ingwer'];
+let recCat='Alle';
 function rPrep(){$('#prep').innerHTML=`<h2>Mealprep-Woche</h2>
  <ul class="pl"><li><span><b>Sonntag</b> (≈ 90 Min.)<br><span class="small mut">Reis für alles, Hähnchen-Bowls, Chili, Overnight Oats für Mo–Do</span></span><span>Mo–Mi</span></li>
  <li><span><b>Mittwochabend</b> (≈ 40 Min.)<br><span class="small mut">Linsen-Curry, neue Oats; Chili aus dem Gefrierfach</span></span><span>Do–Sa</span></li>
  <li><span><b>Täglich</b> (2 Min.)<br><span class="small mut">Quark-Bowl: 250 g Magerquark, 1 Banane, 20 g Nüsse</span></span><span>390 kcal</span></li></ul>
- ${REC.map(([n,m,ing,st,k])=>`<details class="recipe"><summary>${n}</summary><p class="small mut" style="margin:4px 0">${m}</p><ul>${ing.map(x=>`<li>${x}</li>`).join('')}</ul><ol>${st.map(x=>`<li>${x}</li>`).join('')}</ol><p class="small mut">${k}</p></details>`).join('')}
+ <p class="small mut" style="margin:16px 0 0">${REC.length} Rezepte · Nährwerte pro Portion, gerundet</p>
+ <div class="types" style="margin:8px 0">${['Alle','Frühstück','Mittag/Abend','Snack'].map(c=>`<button class="sm${recCat===c?' on':''}" data-cat="${c}">${c}</button>`).join('')}</div>
+ ${REC.filter(r=>recCat==='Alle'||r[5]===recCat).map(([n,m,ing,st,k,c])=>`<details class="recipe"><summary>${n} <span class="tag">${c}</span></summary><p class="small mut" style="margin:4px 0">${m}</p><ul>${ing.map(x=>`<li>${x}</li>`).join('')}</ul><ol>${st.map(x=>`<li>${x}</li>`).join('')}</ol><p class="small mut">${k}</p></details>`).join('')}
  <details class="recipe"><summary>Einkaufsliste für die Woche</summary><ul>${SHOP.map(x=>`<li>${x}</li>`).join('')}</ul><button class="sm" id="shopCp">Liste kopieren</button> <span class="small mut" id="shopMsg"></span></details>
  <p class="small mut">Tipp: Am Trainingstag eine Mahlzeit mit Kohlenhydraten und Eiweiß 1–3 Std. vor dem Gym. Wichtiger als das Timing ist, dass du über den Tag dein Eiweiß- und Kalorienziel erreichst. Keine medizinische Beratung – bei Vorerkrankungen bitte mit Arzt oder Ärztin abklären.</p>`}
-$('#prep').addEventListener('click',async ev=>{if(ev.target.id!=='shopCp')return;try{await navigator.clipboard.writeText(SHOP.map(x=>'- '+x).join('\n'));$('#shopMsg').textContent='Kopiert ✓'}catch(e){$('#shopMsg').textContent='Kopieren nicht erlaubt – bitte markieren.'}});
+$('#prep').addEventListener('click',async ev=>{const cb=ev.target.closest('[data-cat]');if(cb){recCat=cb.dataset.cat;rPrep();return}if(ev.target.id!=='shopCp')return;try{await navigator.clipboard.writeText(SHOP.map(x=>'- '+x).join('\n'));$('#shopMsg').textContent='Kopiert ✓'}catch(e){$('#shopMsg').textContent='Kopieren nicht erlaubt – bitte markieren.'}});
 /* Routing */
 const VIEWS=['uebersicht','training','verlauf','plan','essen'];
 function route(){const h=location.hash.slice(1),v=VIEWS.includes(h)?h:'uebersicht';
  for(const x of VIEWS)document.getElementById('v-'+x).classList.toggle('on',x===v);
  document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+v))}
-function renderAll(){rOverview();if(!$('#train').contains(document.activeElement))rTraining();rHistory();rPlan();rFood();rPrep();rAccount();route()}
+function renderAll(){rOverview();if(!$('#train').contains(document.activeElement))rTraining();rHistory();rPlan();rFood();rPrep();rWater();rAccount();route()}
 addEventListener('hashchange',()=>{route();scrollTo(0,0)});
+/* Wasser */
+const VAPID='BK2UeTF1Fuwt0OcziSSk-x4EALJL_maDVGPvbTUvfypGr9GbBq9gXAHt9irg0xMlJFC9HO6zga0NO3I4TU7qoNU';
+const r250=x=>Math.round(x/250)*250,lit=ml=>fmt(ml/1000);
+function waterGoal(ds){const s=S.settings;if(num(s.waterCustom)>0)return Math.round(num(s.waterCustom)*1000);
+ const train=s.days.includes(parse(ds).getDay())||S.workouts.some(w=>w.date===ds);return r250(num(s.weight)*35+(train?500:0))}
+function rWater(){S.water=S.water||{};const t=iso(new Date()),ml=S.water[t]||0,g=waterGoal(t),p=Math.min(1,ml/g),train=g>r250(num(S.settings.weight)*35)&&!(num(S.settings.waterCustom)>0);
+ const days=Array.from({length:7},(_,i)=>{const d=new Date();d.setDate(d.getDate()-6+i);const k=iso(d);return[d,S.water[k]||0,waterGoal(k)]});
+ const lvl=Math.round(148-p*136);
+ $('#water').innerHTML=`<h2>Wasser heute</h2>
+ <div style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:18px;align-items:center">
+  <svg viewBox="0 0 120 160" width="96" height="128" role="img" aria-label="Glas zu ${Math.round(p*100)} Prozent gefüllt"><defs><clipPath id="gl"><path d="M14 8h92l-10 144H24z"/></clipPath></defs>
+   <rect x="0" y="${lvl}" width="120" height="160" fill="var(--blue)" clip-path="url(#gl)" style="transition:y .5s"/>
+   <path d="M14 8h92l-10 144H24z" fill="none" stroke="var(--ink)" stroke-width="4" stroke-linejoin="round"/></svg>
+  <div><b style="font:700 clamp(34px,7vw,46px)/1 'Barlow Condensed',sans-serif;white-space:nowrap">${lit(ml)} / ${lit(g)} l</b>
+   <p class="small mut" style="margin:6px 0 0">${ml>=g?'Ziel erreicht – stark!':`Noch ${lit(g-ml)} l`}${train?' · Trainingstag: +0,5 l':''}</p></div></div>
+ <div class="row" style="margin-top:14px"><button class="pri" data-w="250">+ Glas 250 ml</button><button data-w="500">+ Flasche 500 ml</button><button class="ghost" data-w="-250" style="flex:0 1 auto" aria-label="250 ml abziehen">− 250</button></div>
+ <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:16px;align-items:end;height:76px">${days.map(([d,v,gg])=>`<div title="${dShort(d)}: ${lit(v)} l" style="display:flex;flex-direction:column;justify-content:flex-end;height:100%;text-align:center"><i style="display:block;height:${Math.max(3,Math.min(1,v/gg)*56)}px;border-radius:4px;background:${v>=gg?'var(--blue)':'color-mix(in srgb,var(--blue) 40%,transparent)'}"></i><span class="small mut">${d.toLocaleDateString('de-DE',{weekday:'short'}).slice(0,2)}</span></div>`).join('')}</div>
+ <div class="row" style="margin-top:12px"><div><label for="wCustom">Eigenes Ziel in Litern (leer = automatisch)</label><input id="wCustom" inputmode="decimal" value="${num(S.settings.waterCustom)>0?esc(fmt(S.settings.waterCustom)):''}" placeholder="${lit(waterGoal(t))}"></div></div>
+ <p class="small mut">Automatisch: 35 ml pro kg Körpergewicht, an Trainingstagen +0,5 l. Bei Hitze oder viel Schwitzen mehr.</p>
+ <div id="pushBox"></div>`;rPush()}
+$('#water').addEventListener('click',ev=>{const b=ev.target.closest('[data-w]');if(!b)return;const t=iso(new Date());S.water=S.water||{};S.water[t]=Math.max(0,(S.water[t]||0)+ +b.dataset.w);save();rWater()});
+$('#water').addEventListener('change',ev=>{if(ev.target.id!=='wCustom')return;S.settings.waterCustom=num(ev.target.value)||0;save();rWater()});
+/* Push-Erinnerungen */
+const pushOK=()=>'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;
+const u8=b=>{const p='='.repeat((4-b.length%4)%4),r=atob((b+p).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(r,c=>c.charCodeAt(0))};
+const swReady=()=>Promise.race([navigator.serviceWorker.ready,new Promise((_,rj)=>setTimeout(()=>rj('sw'),4000))]);
+let pushMsg='';
+async function rPush(){const el=$('#pushBox');if(!el)return;let st='off',sub=null;
+ if(!pushOK())st='unsupported';else{try{const reg=await swReady();sub=await reg.pushManager.getSubscription();st=sub?'on':Notification.permission==='denied'?'denied':'off'}catch(e){st='unsupported'}}
+ const ios=/iphone|ipad|ipod/i.test(navigator.userAgent),inst=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+ const txt={on:'Erinnerungen sind an. Um 11, 14, 17 und 20 Uhr prüft die App, ob du im Plan bist – nur wenn du hinterher bist, kommt eine Meldung.',
+  off:'Bekomme eine Meldung auf dem Sperrbildschirm, wenn du über den Tag zu wenig getrunken hast.',
+  denied:'Mitteilungen sind für diese App blockiert. Erlaube sie in den Handy-Einstellungen bei Gymlog.',
+  unsupported:ios&&!inst?'Für Erinnerungen auf dem iPhone die App zuerst zum Home-Bildschirm hinzufügen und von dort öffnen.':'Dieser Browser unterstützt keine Push-Mitteilungen.'}[st];
+ el.innerHTML=`<h3 style="margin-top:18px">Erinnerung auf dem Sperrbildschirm</h3><p class="small mut" style="margin:4px 0 10px">${txt}</p>
+ ${st==='off'?'<button class="pri" id="pushOn">Erinnerungen aktivieren</button>':''}${st==='on'?'<div class="row"><button id="pushTest">Test-Mitteilung</button><button class="ghost" id="pushOff">Ausschalten</button></div>':''}
+ ${pushMsg?`<div class="msg">${esc(pushMsg)}</div>`:''}`}
+$('#water').addEventListener('click',async ev=>{const id=ev.target.id;if(!['pushOn','pushOff','pushTest'].includes(id))return;ev.target.disabled=true;pushMsg='';
+ try{const reg=await swReady();
+  if(id==='pushOn'){if(!sb||!user)throw new Error('Bitte zuerst anmelden.');const perm=await Notification.requestPermission();if(perm!=='granted')throw new Error('Mitteilungen wurden nicht erlaubt.');
+   const sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID)});
+   const {error}=await sb.from('push_subs').upsert({endpoint:sub.endpoint,user_id:user.id,sub:sub.toJSON()});if(error){await sub.unsubscribe();throw error}pushMsg='Aktiviert ✓'}
+  if(id==='pushOff'){const sub=await reg.pushManager.getSubscription();if(sub){if(sb&&user)await sb.from('push_subs').delete().eq('endpoint',sub.endpoint);await sub.unsubscribe()}pushMsg='Ausgeschaltet.'}
+  if(id==='pushTest'){await reg.showNotification('Trink etwas Wasser',{body:'So sieht die Erinnerung aus.',icon:'icon-192.png',badge:'icon-192.png',tag:'water-test'});pushMsg='Test geschickt – schau oben bzw. auf den Sperrbildschirm.'}}
+ catch(e){pushMsg=String(e&&e.message||e)}rPush()});
+
 /* Login & Synchronisierung (Supabase) */
 let syncT;
 const SB_URL='https://vnshuumevvdcyukwswgd.supabase.co',SB_KEY='sb_publishable_6uDc10FyqxwV-IjB9RqX8Q_mcmp9uMK',LDIRTY='gymlog-dirty';

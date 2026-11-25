@@ -1,6 +1,6 @@
 // Gymlog Service Worker: macht die App offline nutzbar.
 // Bei Änderungen an der App die Versionsnummer erhöhen.
-const CACHE = 'gymlog-v2';
+const CACHE = 'gymlog-v3';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './vendor/supabase.js'];
 
 self.addEventListener('install', e => {
@@ -30,4 +30,24 @@ self.addEventListener('fetch', e => {
       const copy = r.clone(); caches.open(CACHE).then(c => c.put(req, copy)); return r;
     })));
   }
+});
+
+// Push-Mitteilungen (z. B. Wasser-Erinnerung) anzeigen
+self.addEventListener('push', e => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (_) { d = { body: e.data ? e.data.text() : '' }; }
+  e.waitUntil(self.registration.showNotification(d.title || 'Gymlog', {
+    body: d.body || '', icon: 'icon-192.png', badge: 'icon-192.png',
+    tag: d.tag || 'gymlog', renotify: true, data: { url: d.url || './#essen' }
+  }));
+});
+
+// Tippen auf die Mitteilung öffnet die App
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const url = new URL((e.notification.data && e.notification.data.url) || './', self.registration.scope).href;
+  e.waitUntil(clients.matchAll({ type: 'window', includeUncontrolled: true }).then(cs => {
+    for (const c of cs) { if ('focus' in c) { c.navigate(url).catch(() => {}); return c.focus(); } }
+    return clients.openWindow(url);
+  }));
 });
