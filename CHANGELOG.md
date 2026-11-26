@@ -2,6 +2,9 @@
 
 Neueste Einträge oben. Jeder tägliche Verbesserungs-Durchlauf ergänzt hier einen Abschnitt.
 
+## 2026-11-26 – Updates kommen sofort an
+- Service Worker umgeht beim Laden der Seite den Browser-Cache, sucht beim Öffnen nach neuen Versionen und lädt die App automatisch neu (außer während ein Training eingetragen wird)
+
 ## 2026-11-26 – Navigation unten mit Icons
 - Auf dem Handy sitzt die Navigation fest am unteren Rand (Icons + kurze Beschriftung), verschwindet beim Tippen in Eingabefelder
 - Am PC bleibt sie oben, jetzt mit Icons

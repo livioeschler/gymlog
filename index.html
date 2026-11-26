@@ -561,7 +561,10 @@ if(!standalone){let hide=false;try{hide=localStorage.getItem('gymlog-hint')==='x
  if(!hide){const ios=/iphone|ipad|ipod/i.test(navigator.userAgent),el=$('#install');el.style.display='block';
   el.innerHTML=`<b>Als App installieren:</b> ${ios?'In Safari auf Teilen ⬆︎ → „Zum Home-Bildschirm“.':'Im Browser-Menü ⋮ → „App installieren“ bzw. „Zum Startbildschirm hinzufügen“.'} <button class="sm ghost" id="hintX">Ausblenden</button>`;
   $('#hintX').onclick=()=>{el.style.display='none';try{localStorage.setItem('gymlog-hint','x')}catch(e){}}}}
-if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+if('serviceWorker' in navigator){const hadCtrl=!!navigator.serviceWorker.controller;let reloaded=false;
+ navigator.serviceWorker.addEventListener('controllerchange',()=>{if(hadCtrl&&!reloaded&&!touched()){reloaded=true;location.reload()}});
+ addEventListener('load',()=>navigator.serviceWorker.register('sw.js',{updateViaCache:'none'}).then(r=>{r.update().catch(()=>{});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')r.update().catch(()=>{})})}).catch(()=>{}))}
 }
 </script>
 </body>
