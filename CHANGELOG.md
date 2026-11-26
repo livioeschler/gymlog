@@ -2,6 +2,11 @@
 
 Neueste Einträge oben. Jeder tägliche Verbesserungs-Durchlauf ergänzt hier einen Abschnitt.
 
+## 2026-11-26 – Latissimus als eigene Muskelgruppe
+- Neue Muskelgruppe „Latissimus“, „Rücken“ heißt jetzt „Oberer Rücken“
+- Latzug, Klimmzüge, Kabelrudern eng: Latissimus voll, oberer Rücken halb; Langhantelrudern: oberer Rücken voll, Latissimus halb
+- Neue Übung „Pullover (Kabel / Kurzhantel)“: Latissimus voll, Brust halb
+
 ## 2026-11-26 – Plan-Änderungen sofort im Training
 - Der Trainings-Entwurf gleicht sich bei jeder Plan-Änderung (und beim Öffnen) mit dem Plan ab: neue Übungen erscheinen, entfernte verschwinden, Reihenfolge und Satzanzahl folgen dem Plan
 - Bereits eingetragene Werte, im Training hinzugefügte Übungen und dort entfernte Übungen bleiben erhalten
