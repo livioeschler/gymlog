@@ -2,6 +2,9 @@
 
 Neueste Einträge oben. Jeder tägliche Verbesserungs-Durchlauf ergänzt hier einen Abschnitt.
 
+## 2026-11-26 – Whey in den Overnight Oats
+- Overnight Oats mit 15 g Whey pro Glas (+50 ml Milch): ≈ 620 kcal, 56 g Eiweiß; Beispieltag und Einkaufsliste angepasst
+
 ## 2026-11-26 – Pausen-Timer (B2, freigegeben)
 - Sobald die Wiederholungen eines Satzes eingetragen sind, startet unten eine schwebende Leiste mit Countdown (über der Navigation am Handy)
 - Standard: 2:30 Min. bei Grundübungen, 1:30 Min. bei Isolation – einstellbar unten im Training („Pause … (Sek.)“, 0 = aus), wird synchronisiert
