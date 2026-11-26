@@ -27,7 +27,7 @@ const RDEF: Any = {
   train: { on: true, lead: 30 }, missed: { on: false, time: "21:00" }, water: { on: true },
   prep: { on: false, days: [0, 3], time: "17:00" }, weekly: { on: true, day: 0, time: "19:00" }, custom: [],
 };
-const liter = (ml: number) => (ml / 1000).toLocaleString("de-DE", { maximumFractionDigits: 2 });
+const liter = (ml: number) => (ml / 1000).toLocaleString("de-DE", { maximumFractionDigits: 1 });
 const toMin = (t: string) => {
   const [h, m] = String(t ?? "").split(":").map(Number);
   return Number.isFinite(h) ? h * 60 + (Number.isFinite(m) ? m : 0) : NaN;
@@ -45,6 +45,23 @@ function berlinNow() {
   const iso = (dt: Date) => dt.toISOString().slice(0, 10);
   const monday = new Date(Date.UTC(y, mo - 1, d - ((dow + 6) % 7)));
   return { today: `${p.year}-${p.month}-${p.day}`, h, mi, dow, monday: iso(monday) };
+}
+
+// Wasserziel wie in der App: Grundwert, der sich langsam an die letzten 14 Tage anpasst (max. 5 l)
+function waterGoal(data: Any, today: string, train: boolean): number {
+  const s = data?.settings ?? {};
+  if (Number(s.waterCustom) > 0) return Math.round(Number(s.waterCustom) * 1000);
+  const r250 = (x: number) => Math.round(x / 250) * 250;
+  const base = r250((Number(s.weight) || 75) * 35 + (train ? 500 : 0));
+  if (s.waterAdapt === false) return base;
+  const [y, m, d] = today.split("-").map(Number);
+  let ema = base;
+  for (let i = 14; i >= 1; i--) {
+    const key = new Date(Date.UTC(y, m - 1, d - i)).toISOString().slice(0, 10);
+    const ml = Number((data?.water ?? {})[key] ?? 0);
+    if (ml > 0) ema += 0.25 * (ml - ema);
+  }
+  return Math.min(5000, Math.max(base, r250(ema)));
 }
 
 function remindersFor(data: Any, now: ReturnType<typeof berlinNow>): Msg[] {
@@ -69,8 +86,7 @@ function remindersFor(data: Any, now: ReturnType<typeof berlinNow>): Msg[] {
   if (r.water?.on !== false && share !== undefined && now.mi === 0) {
     const ml = Number((data?.water ?? {})[now.today] ?? 0);
     const train = trainDay || doneToday;
-    const goal = Number(s.waterCustom) > 0 ? Math.round(Number(s.waterCustom) * 1000)
-      : Math.round(((Number(s.weight) || 75) * 35 + (train ? 500 : 0)) / 250) * 250;
+    const goal = waterGoal(data, now.today, train);
     if (ml < goal * share) out.push({ tag: "water", title: "Trink etwas Wasser", body: `Erst ${liter(ml)} l von ${liter(goal)} l heute. Zeit für ein Glas!`, url: "./#essen" });
   }
   if (r.prep?.on && (r.prep.days ?? []).includes(now.dow) && due(toMin(r.prep.time))) {

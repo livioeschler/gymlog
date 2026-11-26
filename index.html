@@ -428,9 +428,15 @@ addEventListener('hashchange',()=>{route();scrollTo(0,0)});
 /* Wasser */
 const VAPID='BK2UeTF1Fuwt0OcziSSk-x4EALJL_maDVGPvbTUvfypGr9GbBq9gXAHt9irg0xMlJFC9HO6zga0NO3I4TU7qoNU';
 const r250=x=>Math.round(x/250)*250,lit=ml=>fmt(ml/1000);
+/* Wasserziel: Grundwert (35 ml/kg, +0,5 l Trainingstag), passt sich langsam an das Trinkverhalten der letzten 14 Tage an */
+const W_ALPHA=.25,W_MAX=5000,W_DAYS=14;
+function waterBase(ds){const s=S.settings,train=s.days.includes(parse(ds).getDay())||S.workouts.some(w=>w.date===ds);return r250(num(s.weight)*35+(train?500:0))}
+function waterLearned(ds){const b=waterBase(ds),d0=parse(ds);let ema=b,n=0;
+ for(let i=W_DAYS;i>=1;i--){const d=new Date(d0);d.setDate(d.getDate()-i);const ml=(S.water||{})[iso(d)]||0;if(ml>0){ema+=W_ALPHA*(ml-ema);n++}}
+ return{base:b,goal:Math.min(W_MAX,Math.max(b,r250(ema))),n}}
 function waterGoal(ds){const s=S.settings;if(num(s.waterCustom)>0)return Math.round(num(s.waterCustom)*1000);
- const train=s.days.includes(parse(ds).getDay())||S.workouts.some(w=>w.date===ds);return r250(num(s.weight)*35+(train?500:0))}
-function rWater(){S.water=S.water||{};const t=iso(new Date()),ml=S.water[t]||0,g=waterGoal(t),p=Math.min(1,ml/g),train=g>r250(num(S.settings.weight)*35)&&!(num(S.settings.waterCustom)>0);
+ return s.waterAdapt===false?waterBase(ds):waterLearned(ds).goal}
+function rWater(){S.water=S.water||{};const t=iso(new Date()),ml=S.water[t]||0,g=waterGoal(t),p=Math.min(1,ml/g),custom=num(S.settings.waterCustom)>0,wb=waterBase(t),train=!custom&&wb>r250(num(S.settings.weight)*35),learned=!custom&&S.settings.waterAdapt!==false&&g>wb;
  const days=Array.from({length:7},(_,i)=>{const d=new Date();d.setDate(d.getDate()-6+i);const k=iso(d);return[d,S.water[k]||0,waterGoal(k)]});
  const lvl=Math.round(148-p*136);
  $('#water').innerHTML=`<h2>Wasser heute</h2>
@@ -439,14 +445,15 @@ function rWater(){S.water=S.water||{};const t=iso(new Date()),ml=S.water[t]||0,g
    <rect x="0" y="${lvl}" width="120" height="160" fill="var(--blue)" clip-path="url(#gl)" style="transition:y .5s"/>
    <path d="M14 8h92l-10 144H24z" fill="none" stroke="var(--ink)" stroke-width="4" stroke-linejoin="round"/></svg>
   <div><b style="font:700 clamp(34px,7vw,46px)/1 'Barlow Condensed',sans-serif;white-space:nowrap">${lit(ml)} / ${lit(g)} l</b>
-   <p class="small mut" style="margin:6px 0 0">${ml>=g?'Ziel erreicht – stark!':`Noch ${lit(g-ml)} l`}${train?' · Trainingstag: +0,5 l':''}</p></div></div>
+   <p class="small mut" style="margin:6px 0 0">${ml>=g?'Ziel erreicht – stark!':`Noch ${lit(g-ml)} l`}${train?' · Trainingstag: +0,5 l':''}${learned?` · an deine letzten Tage angepasst (Grundwert ${lit(wb)} l)`:''}</p></div></div>
  <div class="row" style="margin-top:14px"><button class="pri" data-w="250">+ Glas 250 ml</button><button data-w="500">+ Flasche 500 ml</button><button class="ghost" data-w="-250" style="flex:0 1 auto" aria-label="250 ml abziehen">− 250</button></div>
  <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-top:16px;align-items:end;height:76px">${days.map(([d,v,gg])=>`<div title="${dShort(d)}: ${lit(v)} l" style="display:flex;flex-direction:column;justify-content:flex-end;height:100%;text-align:center"><i style="display:block;height:${Math.max(3,Math.min(1,v/gg)*56)}px;border-radius:4px;background:${v>=gg?'var(--blue)':'color-mix(in srgb,var(--blue) 40%,transparent)'}"></i><span class="small mut">${d.toLocaleDateString('de-DE',{weekday:'short'}).slice(0,2)}</span></div>`).join('')}</div>
  <div class="row" style="margin-top:12px"><div><label for="wCustom">Eigenes Ziel in Litern (leer = automatisch)</label><input id="wCustom" inputmode="decimal" value="${num(S.settings.waterCustom)>0?esc(fmt(S.settings.waterCustom)):''}" placeholder="${lit(waterGoal(t))}"></div></div>
- <p class="small mut">Automatisch: 35 ml pro kg Körpergewicht, an Trainingstagen +0,5 l. Bei Hitze oder viel Schwitzen mehr.</p>
+ <label class="sw" style="margin-top:12px"><input type="checkbox" id="wAdapt" ${S.settings.waterAdapt!==false?'checked':''}><span><b>Ziel lernt mit</b><br><span class="small mut">Trinkst du regelmäßig mehr, steigt das Ziel langsam mit (Durchschnitt der letzten 14 Tage, max. 5 l). Trinkst du wieder weniger, sinkt es zurück – nie unter den Grundwert.</span></span></label>
+ <p class="small mut">Grundwert: 35 ml pro kg Körpergewicht, an Trainingstagen +0,5 l. Ein eigenes Ziel oben ersetzt die automatische Berechnung.</p>
  <p class="small mut">Wasser-Erinnerung: <b>${rem().water.on?'an':'aus'}</b> – einstellen unter <a href="#plan">Plan &amp; Erinnerung</a>.</p>`}
 $('#water').addEventListener('click',ev=>{const b=ev.target.closest('[data-w]');if(!b)return;const t=iso(new Date());S.water=S.water||{};S.water[t]=Math.max(0,(S.water[t]||0)+ +b.dataset.w);save();rWater()});
-$('#water').addEventListener('change',ev=>{if(ev.target.id!=='wCustom')return;S.settings.waterCustom=num(ev.target.value)||0;save();rWater()});
+$('#water').addEventListener('change',ev=>{if(ev.target.id==='wAdapt'){S.settings.waterAdapt=ev.target.checked;save();rWater();return}if(ev.target.id!=='wCustom')return;S.settings.waterCustom=num(ev.target.value)||0;save();rWater()});
 /* Push-Erinnerungen */
 const pushOK=()=>'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;
 const u8=b=>{const p='='.repeat((4-b.length%4)%4),r=atob((b+p).replace(/-/g,'+').replace(/_/g,'/'));return Uint8Array.from(r,c=>c.charCodeAt(0))};
