@@ -2,6 +2,11 @@
 
 Neueste Einträge oben. Jeder tägliche Verbesserungs-Durchlauf ergänzt hier einen Abschnitt.
 
+## 2026-11-26 – Navigation unten mit Icons
+- Auf dem Handy sitzt die Navigation fest am unteren Rand (Icons + kurze Beschriftung), verschwindet beim Tippen in Eingabefelder
+- Am PC bleibt sie oben, jetzt mit Icons
+- Plan: Übungsname steht immer über Sätzen/Wdh. (auch am PC lesbar)
+
 ## 2026-11-26 – Lernendes Wasserziel
 - Wasserziel passt sich langsam an die letzten 14 Tage an (gleitender Durchschnitt, 25 % pro Tag), nie unter den Grundwert, max. 5 l
 - Schalter „Ziel lernt mit“ im Wasserbereich (Standard: an); eigenes Ziel ersetzt weiterhin alles
