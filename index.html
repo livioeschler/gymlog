@@ -198,18 +198,21 @@ const fmt=n=>(+n||0).toLocaleString('de-DE',{maximumFractionDigits:1});
 const num=v=>{const x=parseFloat(String(v).replace(',','.'));return isFinite(x)?x:0};
 const LS='gymlog-state',LD='gymlog-draft';
 const MG=[['brust','Brust'],['ruecken','Rücken'],['schultern','Schultern'],['bizeps','Bizeps'],['trizeps','Trizeps'],['quads','Quadrizeps'],['beinbeuger','Beinbeuger'],['gesaess','Gesäß'],['adduktoren','Adduktoren'],['abduktoren','Abduktoren'],['waden','Waden'],['bauch','Bauch']];
-const EX={bank:['Bankdrücken',{brust:1,trizeps:.5,schultern:.5}],schraeg:['Schrägbankdrücken (KH)',{brust:1,schultern:.5,trizeps:.5}],fly:['Kabel-Fliegende',{brust:1}],ohp:['Schulterdrücken (KH)',{schultern:1,trizeps:.5}],seit:['Seitheben',{schultern:1}],pushd:['Trizepsdrücken am Kabel',{trizeps:1}],ohext:['Trizeps über Kopf',{trizeps:1}],dips:['Dips',{trizeps:1,brust:.5}],lat:['Latzug / Klimmzüge',{ruecken:1,bizeps:.5}],rud:['Langhantelrudern',{ruecken:1,bizeps:.5}],krud:['Kabelrudern eng',{ruecken:1,bizeps:.5}],face:['Face Pulls',{schultern:1,ruecken:.5}],curl:['SZ-Curls',{bizeps:1}],hammer:['Hammercurls',{bizeps:1}],kreuz:['Kreuzheben',{gesaess:1,beinbeuger:.5,ruecken:.5}],squat:['Kniebeugen',{quads:1,gesaess:.5,adduktoren:.5}],rdl:['Rumänisches Kreuzheben',{beinbeuger:1,gesaess:.5}],press:['Beinpresse',{quads:1,gesaess:.5}],lc:['Beinbeuger / Leg Curls',{beinbeuger:1}],ext:['Beinstrecker / Leg Extension',{quads:1}],lunge:['Ausfallschritte',{quads:1,gesaess:.5,adduktoren:.5}],bss:['Bulgarian Split Squat',{quads:1,gesaess:.5,adduktoren:.5}],add:['Adduktorenmaschine',{adduktoren:1}],abd:['Abduktorenmaschine',{abduktoren:1,gesaess:.5}],hip:['Hip Thrust',{gesaess:1,beinbeuger:.5}],calf:['Wadenheben',{waden:1}],crunch:['Kabel-Crunch',{bauch:1}],legr:['Beinheben hängend',{bauch:1}]};
+const EX={bank:['Bankdrücken',{brust:1,trizeps:.5,schultern:.5}],schraeg:['Schrägbankdrücken (KH)',{brust:1,schultern:.5,trizeps:.5}],fly:['Kabel-Fliegende',{brust:1}],ohp:['Schulterdrücken (KH)',{schultern:1,trizeps:.5}],seit:['Seitheben',{schultern:1}],pushd:['Trizepsdrücken am Kabel',{trizeps:1}],ohext:['Trizeps über Kopf',{trizeps:1}],dips:['Dips',{trizeps:1,brust:.5},{bw:1}],lat:['Latzug',{ruecken:1,bizeps:.5}],klimm:['Klimmzüge',{ruecken:1,bizeps:.5},{bw:1}],rud:['Langhantelrudern',{ruecken:1,bizeps:.5}],krud:['Kabelrudern eng',{ruecken:1,bizeps:.5}],face:['Face Pulls',{schultern:1,ruecken:.5}],curl:['SZ-Curls',{bizeps:1}],hammer:['Hammercurls',{bizeps:1}],kreuz:['Kreuzheben',{gesaess:1,beinbeuger:.5,ruecken:.5}],squat:['Kniebeugen',{quads:1,gesaess:.5,adduktoren:.5}],rdl:['Rumänisches Kreuzheben',{beinbeuger:1,gesaess:.5}],press:['Beinpresse',{quads:1,gesaess:.5}],lc:['Beinbeuger / Leg Curls',{beinbeuger:1}],ext:['Beinstrecker / Leg Extension',{quads:1}],lunge:['Ausfallschritte',{quads:1,gesaess:.5,adduktoren:.5}],bss:['Bulgarian Split Squat',{quads:1,gesaess:.5,adduktoren:.5}],add:['Adduktorenmaschine',{adduktoren:1}],abd:['Abduktorenmaschine',{abduktoren:1,gesaess:.5}],hip:['Hip Thrust',{gesaess:1,beinbeuger:.5}],calf:['Wadenheben',{waden:1}],crunch:['Kabel-Crunch',{bauch:1}],legr:['Beinheben hängend',{bauch:1},{bw:1}]};
 const TY={push:['Push','Brust · Schultern · Trizeps'],pull:['Pull','Rücken · Bizeps · hintere Schulter'],legs:['Legs','Beine · Gesäß · Bauch']};
 const ORDER=['push','pull','legs'];
 const DEF={updated:0,settings:{days:[1,3,5],time:'18:00',alarm:30,sex:'m',age:25,height:180,weight:75,act:1.5,surplus:250},
  plan:{push:[['bank',4,'6–8'],['schraeg',3,'8–10'],['ohp',3,'8–10'],['seit',4,'12–15'],['fly',2,'12–15'],['pushd',3,'10–12']],
-  pull:[['lat',4,'6–10'],['rud',3,'8–10'],['krud',3,'10–12'],['face',3,'15'],['curl',3,'8–12'],['hammer',2,'10–12']],
+  pull:[['klimm',4,'6–10'],['rud',3,'8–10'],['krud',3,'10–12'],['face',3,'15'],['curl',3,'8–12'],['hammer',2,'10–12']],
   legs:[['squat',4,'6–8'],['rdl',3,'8–10'],['press',3,'10–12'],['lc',3,'10–12'],['calf',4,'12–15'],['crunch',3,'12–15']]},custom:{},workouts:[]};
 const clone=o=>JSON.parse(JSON.stringify(o));
-const norm=s=>{if(!s||!s.plan)s=clone(DEF);s.settings={...DEF.settings,...s.settings};s.custom=s.custom||{};s.workouts=s.workouts||[];s.deleted=s.deleted||[];s.water=s.water||{};return s};
+const norm=s=>{if(!s||!s.plan)s=clone(DEF);s.settings={...DEF.settings,...s.settings};s.custom=s.custom||{};s.workouts=s.workouts||[];s.deleted=s.deleted||[];s.water=s.water||{};s.mig=s.mig||{};
+ if(!s.mig.klimm){for(const t of Object.keys(s.plan))s.plan[t]=s.plan[t].map(r=>r[0]==='lat'?['klimm',r[1],r[2]]:r);s.mig.klimm=1}
+ return s};
 function load(){let b=null;try{b=JSON.parse(localStorage.getItem(LS))}catch(e){}return norm(b)}
 let S=load();
-const exName=id=>EX[id]?.[0]||S.custom[id]?.n||id, exM=id=>EX[id]?.[1]||S.custom[id]?.m||{};
+const exName=id=>EX[id]?.[0]||S.custom[id]?.n||id, exM=id=>EX[id]?.[1]||S.custom[id]?.m||{}, isBW=id=>!!(EX[id]?.[2]?.bw||S.custom[id]?.bw);
+const bodyKg=()=>num(S.settings.weight)||75;
 const status=t=>{$('#status').textContent=t};
 const store=()=>{try{localStorage.setItem(LS,JSON.stringify(S))}catch(e){status('Speichern fehlgeschlagen – Speicher voll?')}};
 function save(){S.updated=Date.now();store();setDirty(true);status('Gespeichert ✓');clearTimeout(syncT);syncT=setTimeout(sync,1200)}
@@ -224,7 +227,8 @@ function muscles(ws){const o={};for(const w of ws)for(const s of w.sets)if(num(s
 function planMuscles(){const o={};for(const t of ORDER)for(const[id,n]of S.plan[t])for(const[k,v]of Object.entries(exM(id)))o[k]=(o[k]||0)+v*n;return o}
 const nextType=()=>{const l=sorted()[0];return l?ORDER[(ORDER.indexOf(l.type)+1)%3]:'push'};
 function lastSets(id){for(const w of sorted()){const s=w.sets.filter(x=>x.ex===id&&num(x.r)>0);if(s.length)return{date:w.date,s}}return null}
-const setStr=s=>s.map(x=>`${fmt(x.w)}×${fmt(x.r)}`).join(' · ');
+const kgStr=x=>x.bw?(num(x.x)>0?`KG+${fmt(x.x)}`:num(x.x)<0?`KG−${fmt(-x.x)}`:'KG'):fmt(x.w);
+const setStr=s=>s.map(x=>`${kgStr(x)}×${fmt(x.r)}`).join(' · ');
 /* Übersicht */
 let wOff=0;
 function rOverview(){const m0=monday(new Date());m0.setDate(m0.getDate()+wOff*7);const m1=new Date(m0);m1.setDate(m1.getDate()+7);
@@ -252,10 +256,11 @@ function rTraining(){const opts=[...Object.keys(EX),...Object.keys(S.custom)].so
  <div class="types">${ORDER.map(t=>`<button data-type="${t}" class="${D.type===t?'on':''}">${TY[t][0]}</button>`).join('')}</div>
  ${pendingType?`<div class="msg">Deine Eingaben gehen verloren. <button class="sm" data-act="ctype">Trotzdem zu ${TY[pendingType][0]} wechseln</button> <button class="sm ghost" data-act="ntype">Abbrechen</button></div>`:''}
  <div class="row" style="margin:14px 0 4px"><div><label for="tDate">Datum</label><input type="date" id="tDate" value="${esc(D.date)}"></div></div>
- ${D.ex.map((e,i)=>{const l=lastSets(e.id);return `<div class="ex"><div class="exh"><b>${esc(exName(e.id))}</b><button class="sm ghost" data-act="rmex" data-i="${i}" aria-label="Übung entfernen">✕</button></div>
+ ${D.ex.map((e,i)=>{const l=lastSets(e.id),bw=isBW(e.id);return `<div class="ex"><div class="exh"><b>${esc(exName(e.id))}</b><button class="sm ghost" data-act="rmex" data-i="${i}" aria-label="Übung entfernen">✕</button></div>
   <div class="last">${l?`Letztes Mal (${dShort(parse(l.date))}): ${esc(setStr(l.s))}`:'Noch keine Werte – starte mit einem Gewicht, das du sauber schaffst.'}</div>
-  <div class="sets"><span class="h">Satz</span><span class="h">kg</span><span class="h">Wdh.</span><span></span>
-  ${e.sets.map((s,j)=>`<span class="n">${j+1}</span><input inputmode="decimal" aria-label="Gewicht Satz ${j+1}" data-i="${i}" data-j="${j}" data-f="w" value="${esc(s.w)}" placeholder="${l&&l.s[j]?fmt(l.s[j].w):'kg'}"><input inputmode="numeric" aria-label="Wiederholungen Satz ${j+1}" data-i="${i}" data-j="${j}" data-f="r" value="${esc(s.r)}" placeholder="${l&&l.s[j]?fmt(l.s[j].r):'Wdh.'}"><button class="sm ghost" data-act="rmset" data-i="${i}" data-j="${j}" aria-label="Satz löschen">−</button>`).join('')}</div>
+  ${bw?`<div class="last">Körpergewicht (${fmt(bodyKg())} kg) wird automatisch gerechnet. Bei „+kg“ nur Zusatzgewicht eintragen – ohne Zusatz leer lassen, mit Unterstützung (Band/Maschine) negativ, z. B. −20.</div>`:''}
+  <div class="sets"><span class="h">Satz</span><span class="h">${bw?'+kg':'kg'}</span><span class="h">Wdh.</span><span></span>
+  ${e.sets.map((s,j)=>`<span class="n">${j+1}</span><input inputmode="decimal" aria-label="${bw?'Zusatzgewicht':'Gewicht'} Satz ${j+1}" data-i="${i}" data-j="${j}" data-f="w" value="${esc(s.w)}" placeholder="${bw?(l&&l.s[j]&&l.s[j].bw?fmt(l.s[j].x||0):'0'):(l&&l.s[j]?fmt(l.s[j].w):'kg')}"><input inputmode="numeric" aria-label="Wiederholungen Satz ${j+1}" data-i="${i}" data-j="${j}" data-f="r" value="${esc(s.r)}" placeholder="${l&&l.s[j]?fmt(l.s[j].r):'Wdh.'}"><button class="sm ghost" data-act="rmset" data-i="${i}" data-j="${j}" aria-label="Satz löschen">−</button>`).join('')}</div>
   <button class="sm" style="margin-top:8px" data-act="addset" data-i="${i}">+ Satz</button></div>`}).join('')}
  <div class="row" style="margin-top:10px"><div><label for="addEx">Übung hinzufügen</label><select id="addEx"><option value="">Auswählen …</option>${opts.map(id=>`<option value="${esc(id)}">${esc(exName(id))}</option>`).join('')}<option value="__new">Eigene Übung anlegen …</option></select></div></div>
  <div id="newEx" class="row" style="display:none;margin-top:8px"><div><label for="nxName">Name</label><input id="nxName" placeholder="z. B. Butterfly Maschine"></div><div><label for="nxM">Hauptmuskel</label><select id="nxM">${MG.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select></div><button data-act="newex" style="flex:0 0 auto">Anlegen</button></div>
@@ -276,7 +281,7 @@ $('#train').addEventListener('click',ev=>{const b=ev.target.closest('button');if
  case'rmset':D.ex[i].sets.splice(j,1);break;
  case'newex':{const n=$('#nxName').value.trim();if(!n)return;const id='c'+Date.now().toString(36);S.custom[id]={n,m:{[$('#nxM').value]:1}};D.ex.push({id,sets:[{w:'',r:''},{w:'',r:''},{w:'',r:''}]});save();break}
  case'reset':D=mkDraft(D.type);break;
- case'save':{const sets=[];for(const e of D.ex)for(const s of e.sets)if(num(s.r)>0)sets.push({ex:e.id,w:num(s.w),r:num(s.r)});
+ case'save':{const sets=[];for(const e of D.ex)for(const s of e.sets)if(num(s.r)>0)sets.push(isBW(e.id)?{ex:e.id,w:Math.max(0,bodyKg()+num(s.w)),x:num(s.w),bw:1,r:num(s.r)}:{ex:e.id,w:num(s.w),r:num(s.r)});
   if(!sets.length){trainMsg='Trag mindestens einen Satz mit Wiederholungen ein.';break}
   S.workouts.push({id:Date.now().toString(36),date:D.date||iso(new Date()),type:D.type,sets,note:D.note.trim()});
   D=mkDraft(nextType());saveDraft();save();location.hash='#uebersicht';renderAll();return}}
@@ -305,6 +310,7 @@ function rPlan(){const all=[...Object.keys(EX),...Object.keys(S.custom)].sort((a
   ${newEx===t?`<div class="newx"><b>Neue Übung für ${TY[t][0]}</b>
    <div style="margin-top:8px"><label>Name</label><input data-nx="name" placeholder="z. B. Butterfly Maschine"></div>
    <div class="row" style="margin-top:8px"><div><label>Hauptmuskel</label><select data-nx="m1">${mgOpts(t==='push'?'brust':t==='pull'?'ruecken':'quads')}</select></div><div><label>Nebenmuskel</label><select data-nx="m2"><option value="">keiner</option>${mgOpts('')}</select></div></div>
+   <label class="sw" style="margin-top:10px"><input type="checkbox" data-nx="bw"><span>Körpergewichtsübung<br><span class="small mut">z. B. Liegestütze – Körpergewicht wird automatisch gerechnet</span></span></label>
    <div class="row" style="margin-top:8px"><div><label>Sätze</label><input data-nx="sets" inputmode="numeric" value="3"></div><div><label>Wdh.</label><input data-nx="reps" value="8–12"></div></div>
    <div class="nxmsg"></div><div class="row" style="margin-top:10px"><button class="pri" data-nxsave="${t}">Hinzufügen</button><button class="ghost" data-nxcancel="1">Abbrechen</button></div></div>`:
   `<div class="row" style="margin-top:10px"><select data-add="${t}" aria-label="Vorhandene Übung zum ${TY[t][0]}-Tag hinzufügen"><option value="">+ Vorhandene Übung</option>${all.map(id=>`<option value="${esc(id)}">${esc(exName(id))}</option>`).join('')}</select><button data-new="${t}" style="flex:0 1 auto">+ Neue Übung</button></div>`}</div>`).join('');
@@ -319,7 +325,7 @@ $('#planCols').addEventListener('click',ev=>{const b=ev.target.closest('button')
  if(b.dataset.nxsave){const c=b.closest('.card'),g=k=>c.querySelector(`[data-nx=${k}]`).value.trim(),n=g('name');
   if(!n){c.querySelector('.nxmsg').innerHTML='<div class="msg">Bitte einen Namen eingeben.</div>';return}
   const id='c'+Date.now().toString(36),m1=g('m1'),m2=g('m2'),m={[m1]:1};if(m2&&m2!==m1)m[m2]=.5;
-  S.custom[id]={n,m};S.plan[b.dataset.nxsave].push([id,Math.max(1,Math.round(num(g('sets')))||3),g('reps')||'8–12']);newEx=null;save();rPlan();rOverview();
+  S.custom[id]={n,m};if(c.querySelector('[data-nx=bw]').checked)S.custom[id].bw=1;S.plan[b.dataset.nxsave].push([id,Math.max(1,Math.round(num(g('sets')))||3),g('reps')||'8–12']);newEx=null;save();rPlan();rOverview();
   if(!$('#train').contains(document.activeElement))rTraining()}});
 /* Übungen per Drag & Drop sortieren */
 let drag=null;

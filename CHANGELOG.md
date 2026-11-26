@@ -2,6 +2,11 @@
 
 Neueste Einträge oben. Jeder tägliche Verbesserungs-Durchlauf ergänzt hier einen Abschnitt.
 
+## 2026-11-26 – Klimmzüge mit Körpergewicht
+- „Latzug / Klimmzüge“ aufgeteilt in Latzug und Klimmzüge; im Plan wurde Latzug/Klimmzüge durch Klimmzüge ersetzt
+- Körpergewichtsübungen (Klimmzüge, Dips, Beinheben hängend): Feld „+kg“ nur für Zusatzgewicht, Körpergewicht aus den Ernährungs-Einstellungen wird automatisch gerechnet; Anzeige z. B. „KG+10×5“
+- Eigene Übungen können als Körpergewichtsübung markiert werden
+
 ## 2026-11-26 – Navigation ruhiger
 - Navigation am Handy nur noch mit Icons (Beschriftung für Screenreader erhalten)
 - Jede Seite ist mindestens bildschirmhoch; beim Wechsel wird zuerst nach oben gescrollt, damit die Leiste nicht springt
