@@ -47,10 +47,14 @@ nav .wrap{display:flex;overflow-x:auto;scrollbar-width:none;gap:4px;padding:0 ma
 nav a{flex:none;display:flex;align-items:center;gap:7px;padding:13px 14px;color:var(--mut);text-decoration:none;font-weight:600;border-bottom:3px solid transparent;-webkit-tap-highlight-color:transparent}
 nav a svg{width:20px;height:20px;flex:none}
 @media(max-width:899px){
- nav{position:fixed;top:auto;bottom:0;left:0;right:0;z-index:15;background:var(--card);border-bottom:0;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+ body{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+ main.band{flex:1 0 auto}
+ nav{position:fixed;top:auto;bottom:0;left:0;right:0;z-index:15;transform:translateZ(0);background:var(--card);border-bottom:0;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
  nav .wrap{padding:0;gap:0;overflow:visible}
- nav a{flex:1 1 0;flex-direction:column;gap:3px;padding:9px 2px 7px;font-size:11px;font-weight:600;border-bottom:0;border-top:3px solid transparent}
- nav a svg{width:24px;height:24px}
+ nav a{flex:1 1 0;justify-content:center;padding:13px 2px 12px;border-bottom:0;border-top:3px solid transparent}
+ nav a svg{width:26px;height:26px}
+ nav a span{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+ main.band{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
  nav a.on{border-color:transparent}
  nav a.on svg{color:var(--acc)}
  main.band{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
@@ -160,7 +164,7 @@ h4{font:700 19px "Barlow Condensed",sans-serif;margin:20px 0 8px}
   <div class="wk" id="wk"></div>
 </div></header>
 <nav aria-label="Hauptnavigation"><div class="wrap">
-  <a href="#uebersicht"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Übersicht</span></a><a href="#training"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 6.5v11M3.5 9v6M17.5 6.5v11M20.5 9v6M6.5 12h11"/></svg><span>Training</span></a><a href="#verlauf"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Verlauf</span></a><a href="#plan"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span>Plan</span></a><a href="#essen"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8c-1.2-1.6-3.2-2.3-5-1.6C4 7.5 3.4 11.5 5 15.5c1.2 3 3.3 5 5.2 4.2.6-.3 1.2-.3 1.8 0 1.9.8 4-1.2 5.2-4.2 1.6-4-1-8-2.2-9.1-1.8-.7-3.8 0-5 1.6z"/><path d="M12 8c0-2 1-3.5 3-4.5"/></svg><span>Ernährung</span></a>
+  <a href="#uebersicht" aria-label="Übersicht"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>Übersicht</span></a><a href="#training" aria-label="Training"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 6.5v11M3.5 9v6M17.5 6.5v11M20.5 9v6M6.5 12h11"/></svg><span>Training</span></a><a href="#verlauf" aria-label="Verlauf"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Verlauf</span></a><a href="#plan" aria-label="Plan"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span>Plan</span></a><a href="#essen" aria-label="Ernährung"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8c-1.2-1.6-3.2-2.3-5-1.6C4 7.5 3.4 11.5 5 15.5c1.2 3 3.3 5 5.2 4.2.6-.3 1.2-.3 1.8 0 1.9.8 4-1.2 5.2-4.2 1.6-4-1-8-2.2-9.1-1.8-.7-3.8 0-5 1.6z"/><path d="M12 8c0-2 1-3.5 3-4.5"/></svg><span>Ernährung</span></a>
 </div></nav>
 <main class="band"><div class="wrap">
   <section id="v-uebersicht"><div class="grid two">
@@ -435,7 +439,7 @@ function route(){const h=location.hash.slice(1),v=VIEWS.includes(h)?h:'uebersich
  for(const x of VIEWS)document.getElementById('v-'+x).classList.toggle('on',x===v);
  document.querySelectorAll('nav a').forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+v))}
 function renderAll(){rOverview();if(!$('#train').contains(document.activeElement))rTraining();rHistory();rPlan();rFood();rPrep();rWater();rAccount();route()}
-addEventListener('hashchange',()=>{route();scrollTo(0,0)});
+addEventListener('hashchange',()=>{scrollTo(0,0);route();scrollTo(0,0)});
 /* Wasser */
 const VAPID='BK2UeTF1Fuwt0OcziSSk-x4EALJL_maDVGPvbTUvfypGr9GbBq9gXAHt9irg0xMlJFC9HO6zga0NO3I4TU7qoNU';
 const r250=x=>Math.round(x/250)*250,lit=ml=>fmt(ml/1000);

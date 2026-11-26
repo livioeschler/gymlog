@@ -2,6 +2,10 @@
 
 Neueste Einträge oben. Jeder tägliche Verbesserungs-Durchlauf ergänzt hier einen Abschnitt.
 
+## 2026-11-26 – Navigation ruhiger
+- Navigation am Handy nur noch mit Icons (Beschriftung für Screenreader erhalten)
+- Jede Seite ist mindestens bildschirmhoch; beim Wechsel wird zuerst nach oben gescrollt, damit die Leiste nicht springt
+
 ## 2026-11-26 – Updates kommen sofort an
 - Service Worker umgeht beim Laden der Seite den Browser-Cache, sucht beim Öffnen nach neuen Versionen und lädt die App automatisch neu (außer während ein Training eingetragen wird)
 
