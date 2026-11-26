@@ -2,6 +2,14 @@
 
 Neueste Einträge oben. Jeder tägliche Verbesserungs-Durchlauf ergänzt hier einen Abschnitt.
 
+## 2026-11-26 – Pausen-Timer (B2, freigegeben)
+- Sobald die Wiederholungen eines Satzes eingetragen sind, startet unten eine schwebende Leiste mit Countdown (über der Navigation am Handy)
+- Standard: 2:30 Min. bei Grundübungen, 1:30 Min. bei Isolation – einstellbar unten im Training („Pause … (Sek.)“, 0 = aus), wird synchronisiert
+- Zeigt, was danach kommt (z. B. „Bankdrücken, Satz 2“), Fortschrittsbalken, −15/+15 Sek., ✕ zum Schließen
+- Am Ende: Vibration (Android) und kurzer Ton, Leiste färbt sich „Pause vorbei – nächster Satz!“ und verschwindet nach einer Minute
+- Läuft über die Endzeit weiter, auch nach Neuladen oder wenn die App kurz im Hintergrund war
+- Service-Worker-Cache auf gymlog-v20
+
 ## 2026-11-26 – Steigerungs-Vorschlag beim Eintragen
 - Wer letztes Mal in allen geplanten Sätzen das obere Ende des Wdh.-Bereichs geschafft hat, sieht in der „Letztes Mal“-Zeile „→ heute X kg probieren“ (+2,5 kg bei Grundübungen, +1 kg bei Isolationsübungen; bei Körpergewichtsübungen als Zusatzgewicht, z. B. „KG+12,5“)
 - Schutz vor Tippfehlern: Training mit über 200 Wdh., über 1000 kg oder negativem Gewicht (außer Körpergewichtsübungen) wird nicht gespeichert, sondern mit Hinweis zur Prüfung angehalten

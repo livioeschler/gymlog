@@ -126,6 +126,13 @@ ul.pl li>span:last-child{flex:none;white-space:nowrap;color:var(--mut);font-vari
 .recipe summary{cursor:pointer;font-weight:600;font-size:18px}
 .recipe ul,.recipe ol{margin:8px 0;padding-left:20px}
 .status{font-size:14px;opacity:.9;margin-top:6px}
+.rest{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:14;width:min(520px,calc(100% - 24px));background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:14px;box-shadow:0 6px 24px rgb(0 0 0/.18);padding:10px 12px 12px}
+.rest[hidden]{display:none}
+.rest .rbar{height:4px;border-radius:2px;background:var(--soft);overflow:hidden;margin-bottom:8px}.rest .rbar i{display:block;height:100%;width:100%;background:var(--acc);transition:width .25s linear}
+.rest .rrow{display:flex;align-items:center;gap:8px}.rest .rt{font:700 30px/1 Barlow,sans-serif;font-variant-numeric:tabular-nums;min-width:3.1em}.rest .rl{font-size:14px;color:var(--mut);overflow-wrap:anywhere;margin-bottom:4px}
+.rest.done{background:var(--acc);border-color:var(--acc);color:var(--on)}.rest.done .rl{color:var(--on)}.rest.done .rbar{visibility:hidden}.rest.done button{background:transparent;color:var(--on);border-color:color-mix(in srgb,var(--on) 45%,transparent)}
+body:has(.rest:not([hidden])) main.band{padding-bottom:calc(150px + env(safe-area-inset-bottom))}
+@media(max-width:899px){.rest{bottom:calc(66px + env(safe-area-inset-bottom))}body:has(input:focus,textarea:focus) .rest{bottom:10px}}
 .msg{padding:10px 12px;border-radius:10px;background:var(--zone);margin:10px 0;font-size:15px}
 .empty{padding:22px;text-align:center;color:var(--mut)}
 pre{overflow-x:auto;white-space:pre-wrap;font-size:13px;background:var(--soft);padding:10px;border-radius:8px}
@@ -190,6 +197,7 @@ h4{font:700 19px "Barlow Condensed",sans-serif;margin:20px 0 8px}
   </section>
   <section id="v-essen"><div class="grid two"><div><div class="card" id="water"></div><div class="card" style="margin-top:22px" id="calc"></div><div class="card" style="margin-top:22px" id="day"></div></div><div class="card" id="prep"></div></div></section>
 </div></main>
+<div id="rest" class="rest" hidden role="timer" aria-live="off"><div class="rbar"><i></i></div><div class="rl"></div><div class="rrow"><span class="rt">0:00</span><span style="flex:1"></span><button class="sm ghost" data-r="-15" aria-label="15 Sekunden weniger">−15</button><button class="sm ghost" data-r="15" aria-label="15 Sekunden mehr">+15</button><button class="sm ghost" data-r="x" aria-label="Pausen-Timer schließen">✕</button></div></div>
 <script src="vendor/supabase.js"></script>
 <script>
 {
@@ -202,7 +210,7 @@ const MG=[['brust','Brust'],['latiss','Latissimus'],['ruecken','Oberer Rücken']
 const EX={bank:['Bankdrücken',{brust:1,trizeps:.5,schultern:.5}],schraeg:['Schrägbankdrücken (KH)',{brust:1,schultern:.5,trizeps:.5}],fly:['Kabel-Fliegende',{brust:1}],ohp:['Schulterdrücken (KH)',{schultern:1,trizeps:.5}],seit:['Seitheben',{schultern:1}],pushd:['Trizepsdrücken am Kabel',{trizeps:1}],ohext:['Trizeps über Kopf',{trizeps:1}],dips:['Dips',{trizeps:1,brust:.5},{bw:1}],lat:['Latzug',{latiss:1,ruecken:.5,bizeps:.5}],klimm:['Klimmzüge',{latiss:1,ruecken:.5,bizeps:.5},{bw:1}],rud:['Langhantelrudern',{ruecken:1,latiss:.5,bizeps:.5}],krud:['Kabelrudern eng',{latiss:1,ruecken:.5,bizeps:.5}],pullover:['Pullover (Kabel / Kurzhantel)',{latiss:1,brust:.5}],face:['Face Pulls',{schultern:1,ruecken:.5}],curl:['SZ-Curls',{bizeps:1}],hammer:['Hammercurls',{bizeps:1}],kreuz:['Kreuzheben',{gesaess:1,beinbeuger:.5,ruecken:.5}],squat:['Kniebeugen',{quads:1,gesaess:.5,adduktoren:.5}],rdl:['Rumänisches Kreuzheben',{beinbeuger:1,gesaess:.5}],press:['Beinpresse',{quads:1,gesaess:.5}],lc:['Beinbeuger / Leg Curls',{beinbeuger:1}],ext:['Beinstrecker / Leg Extension',{quads:1}],lunge:['Ausfallschritte',{quads:1,gesaess:.5,adduktoren:.5}],bss:['Bulgarian Split Squat',{quads:1,gesaess:.5,adduktoren:.5}],add:['Adduktorenmaschine',{adduktoren:1}],abd:['Abduktorenmaschine',{abduktoren:1,gesaess:.5}],hip:['Hip Thrust',{gesaess:1,beinbeuger:.5}],calf:['Wadenheben',{waden:1}],crunch:['Kabel-Crunch',{bauch:1}],legr:['Beinheben hängend',{bauch:1},{bw:1}]};
 const TY={push:['Push','Brust · Schultern · Trizeps'],pull:['Pull','Latissimus · oberer Rücken · Bizeps'],legs:['Legs','Beine · Gesäß · Bauch']};
 const ORDER=['push','pull','legs'];
-const DEF={updated:0,settings:{days:[1,3,5],time:'18:00',alarm:30,sex:'m',age:25,height:180,weight:75,act:1.5,surplus:250},
+const DEF={updated:0,settings:{days:[1,3,5],time:'18:00',alarm:30,sex:'m',age:25,height:180,weight:75,act:1.5,surplus:250,restBig:150,restIso:90},
  plan:{push:[['bank',4,'6–8'],['schraeg',3,'8–10'],['ohp',3,'8–10'],['seit',4,'12–15'],['fly',2,'12–15'],['pushd',3,'10–12']],
   pull:[['klimm',4,'6–10'],['rud',3,'8–10'],['krud',3,'10–12'],['face',3,'15'],['curl',3,'8–12'],['hammer',2,'10–12']],
   legs:[['squat',4,'6–8'],['rdl',3,'8–10'],['press',3,'10–12'],['lc',3,'10–12'],['calf',4,'12–15'],['crunch',3,'12–15']]},custom:{},workouts:[]};
@@ -238,6 +246,27 @@ function nextKg(id,l,t){if(!l||!l.s.length)return null;const p=planRow(id,t);if(
  const inc=BIG.has(id)?2.5:1;
  if(isBW(id)){if(!l.s.every(x=>x.bw))return null;return{bw:1,x:Math.max(...l.s.map(x=>num(x.x)))+inc}}
  const w=Math.max(...l.s.map(x=>num(x.w)));return w>0?{w:w+inc}:null}
+/* Pausen-Timer: startet nach jedem eingetragenen Satz, läuft über absolute Endzeit (übersteht Neuladen/Hintergrund) */
+const LR='gymlog-rest';let R=null,rTick=null,aCtx=null;try{R=JSON.parse(localStorage.getItem(LR))}catch(e){}
+const mmss=sec=>`${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}`;
+const saveRest=()=>{try{R?localStorage.setItem(LR,JSON.stringify(R)):localStorage.removeItem(LR)}catch(e){}};
+function beep(){try{aCtx=aCtx||new(window.AudioContext||window.webkitAudioContext)();const t0=aCtx.currentTime;for(const d of[0,.35]){const o=aCtx.createOscillator(),g=aCtx.createGain();o.frequency.value=880;g.gain.setValueAtTime(.0001,t0+d);g.gain.exponentialRampToValueAtTime(.25,t0+d+.02);g.gain.exponentialRampToValueAtTime(.0001,t0+d+.25);o.connect(g).connect(aCtx.destination);o.start(t0+d);o.stop(t0+d+.3)}}catch(e){}}
+function restAfter(i,j){const e=D.ex[i];if(!e)return;const sec=Math.round(num(BIG.has(e.id)?S.settings.restBig:S.settings.restIso));if(!(sec>0))return;
+ let label;if(j+1<e.sets.length)label=`Pause · danach: ${exName(e.id)}, Satz ${j+2}`;else{const n=D.ex[i+1];label=n?`Pause · danach: ${exName(n.id)}`:'Pause · letzter Satz geschafft'}
+ try{aCtx=aCtx||new(window.AudioContext||window.webkitAudioContext)();aCtx.resume&&aCtx.resume()}catch(e){}
+ R={end:Date.now()+sec*1000,total:sec,label};saveRest();rRest()}
+function rRest(){const el=$('#rest');clearInterval(rTick);rTick=null;if(!R){el.hidden=true;el.classList.remove('done');return}
+ const tick=()=>{if(!R)return;const left=Math.ceil((R.end-Date.now())/1000);el.hidden=false;
+  if(left<=0){if(!R.done){R.done=1;saveRest();if(Date.now()-R.end<5000){try{navigator.vibrate&&navigator.vibrate([300,150,300])}catch(e){}beep()}}
+   el.classList.add('done');el.querySelector('.rt').textContent='0:00';el.querySelector('.rl').textContent='Pause vorbei – nächster Satz!';el.querySelector('.rbar i').style.width='0%';
+   if(Date.now()-R.end>60000){R=null;saveRest();rRest()}return}
+  el.classList.remove('done');el.querySelector('.rt').textContent=mmss(left);el.querySelector('.rl').textContent=R.label;el.querySelector('.rbar i').style.width=`${Math.max(0,Math.min(100,(R.end-Date.now())/(R.total*1000)*100))}%`};
+ tick();rTick=setInterval(tick,250)}
+$('#rest').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b||!R)return;const v=b.dataset.r;
+ if(v==='x')R=null;else{const d=+v*1000;R.end=Math.max(Date.now()+1000,(R.done?Date.now():R.end)+d);R.total=Math.max(R.total,Math.ceil((R.end-Date.now())/1000));R.done=0}
+ saveRest();rRest()});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&R)rRest()});
+rRest();
 const nextStr=n=>n?` → heute ${n.bw?kgStr(n):fmt(n.w)+' kg'} probieren`:'';
 /* Übersicht */
 let wOff=0;
@@ -284,9 +313,11 @@ function rTraining(){syncDraft();const opts=[...Object.keys(EX),...Object.keys(S
  <div style="margin-top:14px"><label for="tNote">Notiz (optional)</label><textarea id="tNote" placeholder="Wie lief's? Schlaf, Energie, Technik …">${esc(D.note)}</textarea></div>
  ${trainMsg?`<div class="msg">${esc(trainMsg)}</div>`:''}
  <div class="row" style="margin-top:14px"><button class="pri" data-act="save">Training speichern</button><button class="ghost" data-act="reset" style="flex:0 1 auto">Neu aus Plan laden</button></div>
- <p class="small mut">Eingaben werden laufend als Entwurf gemerkt. Nur Sätze mit Wiederholungen zählen.</p>`}
-$('#train').addEventListener('input',ev=>{const t=ev.target;if(t.dataset.f){D.ex[t.dataset.i].sets[t.dataset.j][t.dataset.f]=t.value}else if(t.id==='tDate')D.date=t.value;else if(t.id==='tNote')D.note=t.value;saveDraft()});
-$('#train').addEventListener('change',ev=>{if(ev.target.id!=='addEx')return;const v=ev.target.value;if(v==='__new'){$('#newEx').style.display='flex';$('#nxName').focus();return}
+ <p class="small mut">Eingaben werden laufend als Entwurf gemerkt. Nur Sätze mit Wiederholungen zählen.</p>
+ <div class="row" style="margin-top:6px"><div><label for="rBig">Pause Grundübungen (Sek.)</label><input id="rBig" inputmode="numeric" value="${esc(S.settings.restBig)}"></div><div><label for="rIso">Pause Isolation (Sek.)</label><input id="rIso" inputmode="numeric" value="${esc(S.settings.restIso)}"></div></div>
+ <p class="small mut">Der Pausen-Timer startet, sobald du die Wiederholungen eines Satzes einträgst. 0 = aus.</p>`}
+$('#train').addEventListener('input',ev=>{const t=ev.target;if(t.dataset.f){D.ex[t.dataset.i].sets[t.dataset.j][t.dataset.f]=t.value}else if(t.id==='tDate')D.date=t.value;else if(t.id==='tNote')D.note=t.value;else if(t.id==='rBig'||t.id==='rIso'){S.settings[t.id==='rBig'?'restBig':'restIso']=Math.max(0,Math.min(900,Math.round(num(t.value))));save();return}saveDraft()});
+$('#train').addEventListener('change',ev=>{const t=ev.target;if(t.dataset.f==='r'&&num(t.value)>0){restAfter(+t.dataset.i,+t.dataset.j);return}if(t.id!=='addEx')return;const v=ev.target.value;if(v==='__new'){$('#newEx').style.display='flex';$('#nxName').focus();return}
  if(v){D.ex.push({id:v,extra:1,sets:[{w:'',r:''},{w:'',r:''},{w:'',r:''}]});saveDraft();rTraining()}});
 $('#train').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;const i=+b.dataset.i,j=+b.dataset.j;trainMsg='';
  if(b.dataset.type){const t=b.dataset.type;if(t===D.type)return;if(touched()){pendingType=t}else{D=mkDraft(t);saveDraft()}rTraining();return}
