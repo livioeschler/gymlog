@@ -251,7 +251,14 @@ if(!D||!D.ex)D=mkDraft(nextType());
 const saveDraft=()=>{try{localStorage.setItem(LD,JSON.stringify(D))}catch(e){}};
 const touched=()=>D.ex.some(e=>e.sets.some(s=>s.w!==''||s.r!==''));
 let pendingType=null,trainMsg='';
-function rTraining(){const opts=[...Object.keys(EX),...Object.keys(S.custom)].sort((a,b)=>exName(a).localeCompare(exName(b),'de'));
+/* Entwurf immer mit dem aktuellen Plan abgleichen – eingetragene Werte, eigene Zusatzübungen und entfernte Übungen bleiben erhalten */
+const filled=e=>e.sets.some(s=>s.w!==''||s.r!=='');
+function syncDraft(){const plan=S.plan[D.type]||[],skip=D.skip||[],used=new Set(),out=[];
+ for(const[id,n]of plan){if(skip.includes(id))continue;const e=D.ex.find(x=>x.id===id&&!used.has(x));
+  if(e){used.add(e);out.push(filled(e)||e.mod?e:{...e,sets:Array.from({length:n},()=>({w:'',r:''}))})}else out.push({id,sets:Array.from({length:n},()=>({w:'',r:''}))})}
+ for(const e of D.ex)if(!used.has(e)&&(e.extra||filled(e)))out.push(e);
+ D.ex=out;saveDraft()}
+function rTraining(){syncDraft();const opts=[...Object.keys(EX),...Object.keys(S.custom)].sort((a,b)=>exName(a).localeCompare(exName(b),'de'));
  $('#train').innerHTML=`<h2>Training eintragen</h2>
  <div class="types">${ORDER.map(t=>`<button data-type="${t}" class="${D.type===t?'on':''}">${TY[t][0]}</button>`).join('')}</div>
  ${pendingType?`<div class="msg">Deine Eingaben gehen verloren. <button class="sm" data-act="ctype">Trotzdem zu ${TY[pendingType][0]} wechseln</button> <button class="sm ghost" data-act="ntype">Abbrechen</button></div>`:''}
@@ -270,16 +277,16 @@ function rTraining(){const opts=[...Object.keys(EX),...Object.keys(S.custom)].so
  <p class="small mut">Eingaben werden laufend als Entwurf gemerkt. Nur Sätze mit Wiederholungen zählen.</p>`}
 $('#train').addEventListener('input',ev=>{const t=ev.target;if(t.dataset.f){D.ex[t.dataset.i].sets[t.dataset.j][t.dataset.f]=t.value}else if(t.id==='tDate')D.date=t.value;else if(t.id==='tNote')D.note=t.value;saveDraft()});
 $('#train').addEventListener('change',ev=>{if(ev.target.id!=='addEx')return;const v=ev.target.value;if(v==='__new'){$('#newEx').style.display='flex';$('#nxName').focus();return}
- if(v){D.ex.push({id:v,sets:[{w:'',r:''},{w:'',r:''},{w:'',r:''}]});saveDraft();rTraining()}});
+ if(v){D.ex.push({id:v,extra:1,sets:[{w:'',r:''},{w:'',r:''},{w:'',r:''}]});saveDraft();rTraining()}});
 $('#train').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;const i=+b.dataset.i,j=+b.dataset.j;trainMsg='';
  if(b.dataset.type){const t=b.dataset.type;if(t===D.type)return;if(touched()){pendingType=t}else{D=mkDraft(t);saveDraft()}rTraining();return}
  switch(b.dataset.act){
  case'ctype':D=mkDraft(pendingType);pendingType=null;saveDraft();break;
  case'ntype':pendingType=null;break;
- case'rmex':D.ex.splice(i,1);break;
- case'addset':{const s=D.ex[i].sets,l=s[s.length-1];s.push({w:l?l.w:'',r:''});break}
- case'rmset':D.ex[i].sets.splice(j,1);break;
- case'newex':{const n=$('#nxName').value.trim();if(!n)return;const id='c'+Date.now().toString(36);S.custom[id]={n,m:{[$('#nxM').value]:1}};D.ex.push({id,sets:[{w:'',r:''},{w:'',r:''},{w:'',r:''}]});save();break}
+ case'rmex':{const [e]=D.ex.splice(i,1);if(!e.extra)D.skip=[...(D.skip||[]),e.id];break}
+ case'addset':{const s=D.ex[i].sets,l=s[s.length-1];s.push({w:l?l.w:'',r:''});D.ex[i].mod=1;break}
+ case'rmset':D.ex[i].sets.splice(j,1);D.ex[i].mod=1;break;
+ case'newex':{const n=$('#nxName').value.trim();if(!n)return;const id='c'+Date.now().toString(36);S.custom[id]={n,m:{[$('#nxM').value]:1}};D.ex.push({id,extra:1,sets:[{w:'',r:''},{w:'',r:''},{w:'',r:''}]});save();break}
  case'reset':D=mkDraft(D.type);break;
  case'save':{const sets=[];for(const e of D.ex)for(const s of e.sets)if(num(s.r)>0)sets.push(isBW(e.id)?{ex:e.id,w:Math.max(0,bodyKg()+num(s.w)),x:num(s.w),bw:1,r:num(s.r)}:{ex:e.id,w:num(s.w),r:num(s.r)});
   if(!sets.length){trainMsg='Trag mindestens einen Satz mit Wiederholungen ein.';break}
@@ -314,7 +321,7 @@ function rPlan(){const all=[...Object.keys(EX),...Object.keys(S.custom)].sort((a
    <div class="row" style="margin-top:8px"><div><label>Sätze</label><input data-nx="sets" inputmode="numeric" value="3"></div><div><label>Wdh.</label><input data-nx="reps" value="8–12"></div></div>
    <div class="nxmsg"></div><div class="row" style="margin-top:10px"><button class="pri" data-nxsave="${t}">Hinzufügen</button><button class="ghost" data-nxcancel="1">Abbrechen</button></div></div>`:
   `<div class="row" style="margin-top:10px"><select data-add="${t}" aria-label="Vorhandene Übung zum ${TY[t][0]}-Tag hinzufügen"><option value="">+ Vorhandene Übung</option>${all.map(id=>`<option value="${esc(id)}">${esc(exName(id))}</option>`).join('')}</select><button data-new="${t}" style="flex:0 1 auto">+ Neue Übung</button></div>`}</div>`).join('');
- rRemind()}
+ rRemind();if(!$('#train').contains(document.activeElement))rTraining()}
 $('#planCols').addEventListener('change',ev=>{const e=ev.target;
  if(e.dataset.add){if(e.value)S.plan[e.dataset.add].push([e.value,3,'8–12']);save();rPlan();rOverview();return}
  if(e.dataset.f){const row=S.plan[e.dataset.t][e.dataset.i];row[+e.dataset.f]=e.dataset.f==='1'?Math.max(1,Math.round(num(e.value))||1):e.value.trim();save();rOverview()}});

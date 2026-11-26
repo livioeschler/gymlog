@@ -2,6 +2,10 @@
 
 Neueste Einträge oben. Jeder tägliche Verbesserungs-Durchlauf ergänzt hier einen Abschnitt.
 
+## 2026-11-26 – Plan-Änderungen sofort im Training
+- Der Trainings-Entwurf gleicht sich bei jeder Plan-Änderung (und beim Öffnen) mit dem Plan ab: neue Übungen erscheinen, entfernte verschwinden, Reihenfolge und Satzanzahl folgen dem Plan
+- Bereits eingetragene Werte, im Training hinzugefügte Übungen und dort entfernte Übungen bleiben erhalten
+
 ## 2026-11-26 – Klimmzüge mit Körpergewicht
 - „Latzug / Klimmzüge“ aufgeteilt in Latzug und Klimmzüge; im Plan wurde Latzug/Klimmzüge durch Klimmzüge ersetzt
 - Körpergewichtsübungen (Klimmzüge, Dips, Beinheben hängend): Feld „+kg“ nur für Zusatzgewicht, Körpergewicht aus den Ernährungs-Einstellungen wird automatisch gerechnet; Anzeige z. B. „KG+10×5“
