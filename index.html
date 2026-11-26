@@ -230,6 +230,15 @@ const nextType=()=>{const l=sorted()[0];return l?ORDER[(ORDER.indexOf(l.type)+1)
 function lastSets(id){for(const w of sorted()){const s=w.sets.filter(x=>x.ex===id&&num(x.r)>0);if(s.length)return{date:w.date,s}}return null}
 const kgStr=x=>x.bw?(num(x.x)>0?`KG+${fmt(x.x)}`:num(x.x)<0?`KG−${fmt(-x.x)}`:'KG'):fmt(x.w);
 const setStr=s=>s.map(x=>`${kgStr(x)}×${fmt(x.r)}`).join(' · ');
+/* Steigerungs-Vorschlag: letztes Mal in allen Sätzen das obere Ende des Wdh.-Bereichs geschafft → etwas mehr Gewicht */
+const BIG=new Set(['bank','schraeg','ohp','dips','lat','klimm','rud','krud','kreuz','squat','rdl','press','lunge','bss','hip']);
+function planRow(id,t){for(const k of [t,...ORDER]){const p=(S.plan[k]||[]).find(r=>r[0]===id);if(p)return p}return null}
+function nextKg(id,l,t){if(!l||!l.s.length)return null;const p=planRow(id,t);if(!p)return null;const m=String(p[2]).match(/\d+/g);if(!m)return null;
+ const top=+m[m.length-1];if(!(top>0)||l.s.length<(+p[1]||1)||!l.s.every(x=>num(x.r)>=top))return null;
+ const inc=BIG.has(id)?2.5:1;
+ if(isBW(id)){if(!l.s.every(x=>x.bw))return null;return{bw:1,x:Math.max(...l.s.map(x=>num(x.x)))+inc}}
+ const w=Math.max(...l.s.map(x=>num(x.w)));return w>0?{w:w+inc}:null}
+const nextStr=n=>n?` → heute ${n.bw?kgStr(n):fmt(n.w)+' kg'} probieren`:'';
 /* Übersicht */
 let wOff=0;
 function rOverview(){const m0=monday(new Date());m0.setDate(m0.getDate()+wOff*7);const m1=new Date(m0);m1.setDate(m1.getDate()+7);
@@ -265,7 +274,7 @@ function rTraining(){syncDraft();const opts=[...Object.keys(EX),...Object.keys(S
  ${pendingType?`<div class="msg">Deine Eingaben gehen verloren. <button class="sm" data-act="ctype">Trotzdem zu ${TY[pendingType][0]} wechseln</button> <button class="sm ghost" data-act="ntype">Abbrechen</button></div>`:''}
  <div class="row" style="margin:14px 0 4px"><div><label for="tDate">Datum</label><input type="date" id="tDate" value="${esc(D.date)}"></div></div>
  ${D.ex.map((e,i)=>{const l=lastSets(e.id),bw=isBW(e.id);return `<div class="ex"><div class="exh"><b>${esc(exName(e.id))}</b><button class="sm ghost" data-act="rmex" data-i="${i}" aria-label="Übung entfernen">✕</button></div>
-  <div class="last">${l?`Letztes Mal (${dShort(parse(l.date))}): ${esc(setStr(l.s))}`:'Noch keine Werte – starte mit einem Gewicht, das du sauber schaffst.'}</div>
+  <div class="last">${l?`Letztes Mal (${dShort(parse(l.date))}): ${esc(setStr(l.s))}${esc(nextStr(nextKg(e.id,l,D.type)))}`:'Noch keine Werte – starte mit einem Gewicht, das du sauber schaffst.'}</div>
   ${bw?`<div class="last">Körpergewicht (${fmt(bodyKg())} kg) wird automatisch gerechnet. Bei „+kg“ nur Zusatzgewicht eintragen – ohne Zusatz leer lassen, mit Unterstützung (Band/Maschine) negativ, z. B. −20.</div>`:''}
   <div class="sets"><span class="h">Satz</span><span class="h">${bw?'+kg':'kg'}</span><span class="h">Wdh.</span><span></span>
   ${e.sets.map((s,j)=>`<span class="n">${j+1}</span><input inputmode="decimal" aria-label="${bw?'Zusatzgewicht':'Gewicht'} Satz ${j+1}" data-i="${i}" data-j="${j}" data-f="w" value="${esc(s.w)}" placeholder="${bw?(l&&l.s[j]&&l.s[j].bw?fmt(l.s[j].x||0):'0'):(l&&l.s[j]?fmt(l.s[j].w):'kg')}"><input inputmode="numeric" aria-label="Wiederholungen Satz ${j+1}" data-i="${i}" data-j="${j}" data-f="r" value="${esc(s.r)}" placeholder="${l&&l.s[j]?fmt(l.s[j].r):'Wdh.'}"><button class="sm ghost" data-act="rmset" data-i="${i}" data-j="${j}" aria-label="Satz löschen">−</button>`).join('')}</div>
@@ -291,6 +300,8 @@ $('#train').addEventListener('click',ev=>{const b=ev.target.closest('button');if
  case'reset':D=mkDraft(D.type);break;
  case'save':{const sets=[];for(const e of D.ex)for(const s of e.sets)if(num(s.r)>0)sets.push(isBW(e.id)?{ex:e.id,w:Math.max(0,bodyKg()+num(s.w)),x:num(s.w),bw:1,r:num(s.r)}:{ex:e.id,w:num(s.w),r:num(s.r)});
   if(!sets.length){trainMsg='Trag mindestens einen Satz mit Wiederholungen ein.';break}
+  {const bad=D.ex.find(e=>e.sets.some(x=>num(x.r)>0&&(num(x.r)>200||num(x.w)>1000||(!isBW(e.id)&&num(x.w)<0))));
+   if(bad){trainMsg=`Bitte Werte bei „${exName(bad.id)}“ prüfen – Gewicht oder Wiederholungen sehen nach Tippfehler aus.`;break}}
   S.workouts.push({id:Date.now().toString(36),date:D.date||iso(new Date()),type:D.type,sets,note:D.note.trim()});
   D=mkDraft(nextType());saveDraft();save();location.hash='#uebersicht';renderAll();return}}
  saveDraft();rTraining()});
