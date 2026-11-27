@@ -2,6 +2,9 @@
 
 Neueste Einträge oben. Jeder tägliche Verbesserungs-Durchlauf ergänzt hier einen Abschnitt.
 
+## 2026-11-28 – App startet auf der Startseite
+- Ältere Installationen hatten noch die Statistik als Start-Adresse gespeichert; beim Öffnen wird jetzt immer die Startseite gezeigt
+
 ## 2026-11-27 – Fortschritts-Diagramm pro Übung (B1, freigegeben)
 - Neue Karte „Fortschritt pro Übung“ auf der Statistik-Seite unter den Muskelgruppen
 - Übung wählen (sortiert nach zuletzt trainiert; startet mit der Übung des nächsten Trainingstags), Anzeige „Geschätztes Max.“ (1-Wdh.-Maximum nach Epley aus Gewicht × Wdh.) oder „Schwerster Satz“, Zeitraum 3 Monate / 6 Monate / Alles

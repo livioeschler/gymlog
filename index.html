@@ -745,6 +745,8 @@ else{status('Login konnte nicht geladen werden – Daten bleiben auf dem Gerät'
 addEventListener('online',()=>sync());
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')sync()});
 
+/* Beim Start der App immer die Startseite – ältere Installationen haben noch #uebersicht als Start-Adresse gespeichert */
+if(location.hash==='#uebersicht'||location.hash===''){try{history.replaceState(null,'',location.pathname+location.search+'#start')}catch(e){}}
 renderAll();
 
 $('#bkExp').onclick=()=>{download(`gymlog-backup-${iso(new Date())}.json`,JSON.stringify(S,null,1),'application/json');$('#bkMsg').innerHTML='<div class="msg">Backup geladen.</div>'};
