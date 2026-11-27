@@ -2,6 +2,14 @@
 
 Neueste Einträge oben. Jeder tägliche Verbesserungs-Durchlauf ergänzt hier einen Abschnitt.
 
+## 2026-11-27 – Fortschritts-Diagramm pro Übung (B1, freigegeben)
+- Neue Karte „Fortschritt pro Übung“ auf der Statistik-Seite unter den Muskelgruppen
+- Übung wählen (sortiert nach zuletzt trainiert; startet mit der Übung des nächsten Trainingstags), Anzeige „Geschätztes Max.“ (1-Wdh.-Maximum nach Epley aus Gewicht × Wdh.) oder „Schwerster Satz“, Zeitraum 3 Monate / 6 Monate / Alles
+- Kennzahlen: aktuell, Bestwert, Veränderung seit Beginn bzw. im Zeitraum, Anzahl Trainings
+- Linien-Diagramm mit einer Linie; Tippen/Darüberfahren zeigt Datum und alle Sätze des Trainings; „Als Tabelle“ zum Aufklappen
+- Körpergewichtsübungen inkl. Körpergewicht; Auswahl wird pro Gerät gemerkt
+- Service-Worker-Cache auf gymlog-v25
+
 ## 2026-11-27 – Fix: Trainingsdatum, Steigerung in der Übersicht, sicherere Synchronisierung
 - **Fehler behoben:** Ein neues Training bekam das Datum des *vorherigen* Trainings, wenn man das Datumsfeld nicht anfasste (der Entwurf wurde direkt nach dem Speichern angelegt und behielt dieses Datum). Folgen waren falsche Wochenstatistik, falsche „Letztes Mal“-Daten und eine fälschliche Erinnerung „Training nicht eingetragen“. Jetzt gilt automatisch das heutige Datum, solange noch nichts eingetragen und das Datum nicht bewusst geändert wurde – auch wenn die App über Nacht offen war
 - Training mit Datum in der Zukunft wird nicht gespeichert, sondern mit Hinweis angehalten (A4)

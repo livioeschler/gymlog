@@ -19,7 +19,7 @@ Regeln für die täglichen Durchläufe:
 - [ ] A5 Code in mehrere Dateien aufteilen (ohne Build-Schritt, ES-Module), Verhalten unverändert.
 
 ## B – braucht Go (Design)
-- [ ] B1 Fortschritts-Diagramm pro Übung (Gewicht/geschätztes 1RM über Zeit).
+- [x] B1 **FREIGEGEBEN** – erledigt 2026-11-27: Fortschritts-Diagramm pro Übung (geschätztes Max. / schwerster Satz über Zeit) auf der Statistik-Seite.
 - [x] B2 **FREIGEGEBEN** – erledigt 2026-11-26: Pausen-Timer nach jedem Satz (schwebende Leiste mit Countdown, Vibration).
 - [ ] B3 Persönliche Rekorde mit kleiner Meldung.
 - [ ] B4 Körpergewicht-Tracker mit Wochenschnitt und Kalorien-Anpassung.
