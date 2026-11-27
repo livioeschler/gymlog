@@ -1,2 +1,5 @@
 [functions.water-reminder]
 verify_jwt = false
+
+[functions.garmin-sync]
+verify_jwt = false

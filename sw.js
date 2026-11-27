@@ -1,6 +1,6 @@
 // Gymlog Service Worker: macht die App offline nutzbar.
 // Bei Änderungen an der App die Versionsnummer erhöhen.
-const CACHE = 'gymlog-v22';
+const CACHE = 'gymlog-v23';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './vendor/supabase.js'];
 
 self.addEventListener('install', e => {
@@ -25,7 +25,7 @@ self.addEventListener('fetch', e => {
     return;
   }
   // Alles andere (Icons, Schriften): zuerst Cache, sonst Netz und merken
-  if (url.origin === location.origin || url.hostname.endsWith('fonts.googleapis.com') || url.hostname.endsWith('fonts.gstatic.com')) {
+  if (url.origin === location.origin || url.hostname.endsWith('fonts.googleapis.com') || url.hostname.endsWith('fonts.gstatic.com') || url.hostname === 'cdnjs.cloudflare.com') {
     e.respondWith(caches.match(req).then(hit => hit || fetch(req).then(r => {
       const copy = r.clone(); caches.open(CACHE).then(c => c.put(req, copy)); return r;
     })));

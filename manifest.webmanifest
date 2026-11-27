@@ -2,7 +2,7 @@
   "name": "Gymlog – Push Pull Legs",
   "short_name": "Gymlog",
   "description": "Trainings eintragen, Wochenstatistik pro Muskelgruppe, Plan und Ernährung.",
-  "start_url": "./#uebersicht",
+  "start_url": "./#start",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f4f4f2",

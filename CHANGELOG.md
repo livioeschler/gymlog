@@ -2,6 +2,12 @@
 
 Neueste Einträge oben. Jeder tägliche Verbesserungs-Durchlauf ergänzt hier einen Abschnitt.
 
+## 2026-11-27 – Startseite, Menü und Laufen (Garmin)
+- Neue Startseite: nächster Gym-Tag, Wochenstand (inkl. gelaufene km), Wasser mit Schnell-Buttons, letzter Lauf
+- Navigation über ☰-Menü oben links (Start, Training, Statistik, Laufen, Verlauf, Plan & Erinnerung, Ernährung); untere Leiste entfernt
+- Neue Seite „Laufen“: Aktivitäten aus Garmin (Personal API) mit km/Woche, km/Monat, Ø Pace, Liste mit Dauer/Pace/Puls/Höhenmetern, Route auf Karte (OpenStreetMap, offline als Linie)
+- Neue Edge Function `garmin-sync` + Tabelle `garmin_activities` (supabase/setup-garmin.sql)
+
 ## 2026-11-26 – Whey in den Overnight Oats
 - Overnight Oats mit 15 g Whey pro Glas (+50 ml Milch): ≈ 620 kcal, 56 g Eiweiß; Beispieltag und Einkaufsliste angepasst
 
