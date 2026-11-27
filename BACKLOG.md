@@ -24,3 +24,10 @@ Regeln für die täglichen Durchläufe:
 - [ ] B4 Körpergewicht-Tracker mit Wochenschnitt und Kalorien-Anpassung.
 - [ ] B5 Eiweiß-Zähler mit Schnell-Buttons für die Mealprep-Gerichte.
 - [ ] B6 Steigerungs-Vorschlag hervorheben: „→ heute 82,5 kg“ als kleines farbiges Etikett (Akzentfarbe) statt grauer Text, und auf Tippen das Gewicht in alle Sätze übernehmen.
+
+## Später – niedrige Priorität (Prio 5, NICHT selbst umsetzen)
+Diese Punkte erst angehen, wenn alle A-Punkte erledigt und alle B-Vorschläge umgesetzt oder von Livio abgelehnt sind.
+Dann NICHT umsetzen, sondern Livio in der Zusammenfassung einmal fragen, ob er sie jetzt möchte (Wunsch vom 2026-11-27).
+- [ ] P5-1 Kalorien-Tracker: Mahlzeiten/Kalorien über den Tag eintragen (passend zum Tagesziel aus dem Ernährungsrechner, Schnell-Einträge für die Mealprep-Gerichte).
+  Push-Erinnerung um 09:00, 12:00, 15:00 und 18:00 Uhr: „Hast du schon alle Kalorien eingetragen?“ (über die vorhandene Edge Function, als neue Erinnerungsart unter Plan & Erinnerung ein-/ausschaltbar).
+  Hinweis: überschneidet sich mit B5 (Eiweiß-Zähler) – gemeinsam planen.
