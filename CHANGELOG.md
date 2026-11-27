@@ -2,6 +2,15 @@
 
 Neueste Einträge oben. Jeder tägliche Verbesserungs-Durchlauf ergänzt hier einen Abschnitt.
 
+## 2026-11-27 – Fix: Trainingsdatum, Steigerung in der Übersicht, sicherere Synchronisierung
+- **Fehler behoben:** Ein neues Training bekam das Datum des *vorherigen* Trainings, wenn man das Datumsfeld nicht anfasste (der Entwurf wurde direkt nach dem Speichern angelegt und behielt dieses Datum). Folgen waren falsche Wochenstatistik, falsche „Letztes Mal“-Daten und eine fälschliche Erinnerung „Training nicht eingetragen“. Jetzt gilt automatisch das heutige Datum, solange noch nichts eingetragen und das Datum nicht bewusst geändert wurde – auch wenn die App über Nacht offen war
+- Training mit Datum in der Zukunft wird nicht gespeichert, sondern mit Hinweis angehalten (A4)
+- Pausen-Timer wird beim Speichern des Trainings beendet (zeigte sonst noch eine Übung des gespeicherten Trainings an)
+- Übersicht „Als Nächstes“: Steigerungs-Vorschlag auch in der „Zuletzt:“-Zeile, z. B. „→ heute 82,5 kg probieren“ (A6)
+- Synchronisierung: Wasser-Einträge von zwei Geräten werden zusammengeführt statt dass die ältere Seite ganz verworfen wird
+- Abmelden entfernt auch die zwischengespeicherten Garmin-Aktivitäten vom Gerät
+- Service-Worker-Cache auf gymlog-v24
+
 ## 2026-11-27 – Startseite, Menü und Laufen (Garmin)
 - Neue Startseite: nächster Gym-Tag, Wochenstand (inkl. gelaufene km), Wasser mit Schnell-Buttons, letzter Lauf
 - Navigation über ☰-Menü oben links (Start, Training, Statistik, Laufen, Verlauf, Plan & Erinnerung, Ernährung); untere Leiste entfernt
