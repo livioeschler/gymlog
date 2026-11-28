@@ -254,10 +254,11 @@ const kgStr=x=>x.bw?(num(x.x)>0?`KG+${fmt(x.x)}`:num(x.x)<0?`KG−${fmt(-x.x)}`:
 const setStr=s=>s.map(x=>`${kgStr(x)}×${fmt(x.r)}`).join(' · ');
 /* Steigerungs-Vorschlag: letztes Mal in allen Sätzen das obere Ende des Wdh.-Bereichs geschafft → etwas mehr Gewicht */
 const BIG=new Set(['bank','schraeg','ohp','dips','lat','klimm','rud','krud','kreuz','squat','rdl','press','lunge','bss','hip']);
+const isBig=id=>BIG.has(id)||!!S.custom[id]?.big;
 function planRow(id,t){for(const k of [t,...ORDER]){const p=(S.plan[k]||[]).find(r=>r[0]===id);if(p)return p}return null}
 function nextKg(id,l,t){if(!l||!l.s.length)return null;const p=planRow(id,t);if(!p)return null;const m=String(p[2]).match(/\d+/g);if(!m)return null;
  const top=+m[m.length-1];if(!(top>0)||l.s.length<(+p[1]||1)||!l.s.every(x=>num(x.r)>=top))return null;
- const inc=BIG.has(id)?2.5:1;
+ const inc=isBig(id)?2.5:1;
  if(isBW(id)){if(!l.s.every(x=>x.bw))return null;return{bw:1,x:Math.max(...l.s.map(x=>num(x.x)))+inc}}
  const w=Math.max(...l.s.map(x=>num(x.w)));return w>0?{w:w+inc}:null}
 /* Pausen-Timer: startet nach jedem eingetragenen Satz, läuft über absolute Endzeit (übersteht Neuladen/Hintergrund) */
@@ -276,7 +277,7 @@ async function restNote(show){try{if(!('serviceWorker' in navigator)||Notificati
   await reg.showNotification('Pause läuft',{body:`Bis ${t} Uhr · ${R.label.replace(/^Pause · /,'')}`,tag:'rest',silent:true,icon:'icon-192.png',badge:'icon-192.png',data:{url:'./#training'}})}}catch(e){}}
 document.addEventListener('visibilitychange',()=>restNote(document.visibilityState==='hidden'));
 function beep(){try{aCtx=aCtx||new(window.AudioContext||window.webkitAudioContext)();const t0=aCtx.currentTime;for(const d of[0,.35]){const o=aCtx.createOscillator(),g=aCtx.createGain();o.frequency.value=880;g.gain.setValueAtTime(.0001,t0+d);g.gain.exponentialRampToValueAtTime(.25,t0+d+.02);g.gain.exponentialRampToValueAtTime(.0001,t0+d+.25);o.connect(g).connect(aCtx.destination);o.start(t0+d);o.stop(t0+d+.3)}}catch(e){}}
-function restAfter(i,j){const e=D.ex[i];if(!e)return;const sec=Math.round(num(BIG.has(e.id)?S.settings.restBig:S.settings.restIso));if(!(sec>0))return;
+function restAfter(i,j){const e=D.ex[i];if(!e)return;const sec=Math.round(num(isBig(e.id)?S.settings.restBig:S.settings.restIso));if(!(sec>0))return;
  let label;if(j+1<e.sets.length)label=`Pause · danach: ${exName(e.id)}, Satz ${j+2}`;else{const n=D.ex[i+1];label=n?`Pause · danach: ${exName(n.id)}`:'Pause · letzter Satz geschafft'}
  try{aCtx=aCtx||new(window.AudioContext||window.webkitAudioContext)();aCtx.resume&&aCtx.resume()}catch(e){}
  R={end:Date.now()+sec*1000,total:sec,label};saveRest();rRest()}
@@ -442,6 +443,7 @@ function rPlan(){const all=[...Object.keys(EX),...Object.keys(S.custom)].sort((a
    <div style="margin-top:8px"><label>Name</label><input data-nx="name" placeholder="z. B. Butterfly Maschine"></div>
    <div class="row" style="margin-top:8px"><div><label>Hauptmuskel</label><select data-nx="m1">${mgOpts(t==='push'?'brust':t==='pull'?'latiss':'quads')}</select></div><div><label>Nebenmuskel</label><select data-nx="m2"><option value="">keiner</option>${mgOpts('')}</select></div></div>
    <label class="sw" style="margin-top:10px"><input type="checkbox" data-nx="bw"><span>Körpergewichtsübung<br><span class="small mut">z. B. Liegestütze – Körpergewicht wird automatisch gerechnet</span></span></label>
+   <label class="sw" style="margin-top:10px"><input type="checkbox" data-nx="big"><span>Grundübung (schwer, mehrgelenkig)<br><span class="small mut">z. B. Hackenschmidt-Kniebeuge – Steigerung +2,5 kg und längere Pause statt +1 kg</span></span></label>
    <div class="row" style="margin-top:8px"><div><label>Sätze</label><input data-nx="sets" inputmode="numeric" value="3"></div><div><label>Wdh.</label><input data-nx="reps" value="8–12"></div></div>
    <div class="nxmsg"></div><div class="row" style="margin-top:10px"><button class="pri" data-nxsave="${t}">Hinzufügen</button><button class="ghost" data-nxcancel="1">Abbrechen</button></div></div>`:
   `<div class="row" style="margin-top:10px"><select data-add="${t}" aria-label="Vorhandene Übung zum ${TY[t][0]}-Tag hinzufügen"><option value="">+ Vorhandene Übung</option>${all.map(id=>`<option value="${esc(id)}">${esc(exName(id))}</option>`).join('')}</select><button data-new="${t}" style="flex:0 1 auto">+ Neue Übung</button></div>`}</div>`).join('');
@@ -456,7 +458,7 @@ $('#planCols').addEventListener('click',ev=>{const b=ev.target.closest('button')
  if(b.dataset.nxsave){const c=b.closest('.card'),g=k=>c.querySelector(`[data-nx=${k}]`).value.trim(),n=g('name');
   if(!n){c.querySelector('.nxmsg').innerHTML='<div class="msg">Bitte einen Namen eingeben.</div>';return}
   const id='c'+Date.now().toString(36),m1=g('m1'),m2=g('m2'),m={[m1]:1};if(m2&&m2!==m1)m[m2]=.5;
-  S.custom[id]={n,m};if(c.querySelector('[data-nx=bw]').checked)S.custom[id].bw=1;S.plan[b.dataset.nxsave].push([id,Math.max(1,Math.round(num(g('sets')))||3),g('reps')||'8–12']);newEx=null;save();rPlan();rOverview();
+  S.custom[id]={n,m};if(c.querySelector('[data-nx=bw]').checked)S.custom[id].bw=1;if(c.querySelector('[data-nx=big]').checked)S.custom[id].big=1;S.plan[b.dataset.nxsave].push([id,Math.max(1,Math.round(num(g('sets')))||3),g('reps')||'8–12']);newEx=null;save();rPlan();rOverview();
   if(!$('#train').contains(document.activeElement))rTraining()}});
 /* Übungen per Drag & Drop sortieren */
 let drag=null;
@@ -702,7 +704,9 @@ $('#remind').addEventListener('click',async ev=>{const id=ev.target.id;if(!['pus
 let syncT;
 const SB_URL='https://vnshuumevvdcyukwswgd.supabase.co',SB_KEY='sb_publishable_6uDc10FyqxwV-IjB9RqX8Q_mcmp9uMK',LDIRTY='gymlog-dirty';
 const sb=window.supabase&&supabase.createClient?supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}):null;
-let user=null,syncing=false,again=false,lastSync=null,aMode='login';
+let user=null,syncing=false,again=false,lastSync=null,aMode='login',syncErr=null,syncFails=0,syncRetry=null;
+const syncErrText=e=>{const m=String(e&&(e.message||e.error_description)||e||'');if(/jwt|token|auth|401|403/i.test(m))return'Anmeldung abgelaufen – bitte ab- und wieder anmelden';
+ if(/fetch|network|load failed|timeout/i.test(m))return'Keine Verbindung zum Server';return'Serverfehler'+(m?': '+m.slice(0,80):'')};
 function setDirty(v){try{v?localStorage.setItem(LDIRTY,'1'):localStorage.removeItem(LDIRTY)}catch(e){}}
 const dirty=()=>{try{return localStorage.getItem(LDIRTY)==='1'}catch(e){return false}};
 function merge(a,b){const del=[...new Set([...(a.deleted||[]),...(b.deleted||[])])],ds=new Set(del),m=new Map();
@@ -718,11 +722,13 @@ async function sync(){if(!sb||!user)return;if(!navigator.onLine){status('Offline
   if(remote)S=dirty()?merge(S,remote):((remote.updated||0)>=(S.updated||0)?merge(remote,S):merge(S,remote));
   store();
   if(!remote||sig(remote)!==sig(S)||dirty()){const {error:e2}=await sb.from('gymlog_state').upsert({user_id:user.id,data:S,updated_at:new Date().toISOString()});if(e2)throw e2}
-  setDirty(false);lastSync=new Date();status('Synchronisiert ✓');if(sig(S)!==before)renderAll();else rAccount()}
- catch(e){status('Auf dem Gerät gespeichert – Synchronisierung folgt');console.warn(e)}
+  setDirty(false);lastSync=new Date();syncErr=null;syncFails=0;clearTimeout(syncRetry);status('Synchronisiert ✓');if(sig(S)!==before)renderAll();else rAccount()}
+ catch(e){console.warn(e);syncErr={t:new Date(),m:syncErrText(e)};syncFails++;clearTimeout(syncRetry);
+  /* automatisch erneut versuchen: 15 s, 30 s, 1 min … höchstens alle 5 min */
+  syncRetry=setTimeout(sync,Math.min(300000,15000*2**(syncFails-1)));status('Auf dem Gerät gespeichert – Synchronisierung fehlgeschlagen, neuer Versuch folgt');rAccount()}
  finally{syncing=false;if(again){again=false;sync()}}}
 function rAccount(){const el=$('#acct');if(!el)return;
- el.innerHTML=user?`<ul class="pl"><li><span>Angemeldet als <b>${esc(user.email)}</b></span><span></span></li><li><span>Letzte Synchronisierung</span><span>${lastSync?lastSync.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+' Uhr':'–'}</span></li></ul>
+ el.innerHTML=user?`<ul class="pl"><li><span>Angemeldet als <b>${esc(user.email)}</b></span><span></span></li><li><span>Letzte Synchronisierung</span><span>${lastSync?lastSync.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})+' Uhr':'–'}</span></li>${syncErr?`<li><span>Synchronisierung fehlgeschlagen (${syncErr.t.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'})} Uhr)<br><span class="small mut">${esc(syncErr.m)} · Daten sind auf dem Gerät gespeichert, neuer Versuch läuft automatisch</span></span><span></span></li>`:''}</ul>
   <div class="row" style="margin:12px 0"><button id="syncNow">Jetzt synchronisieren</button><button class="ghost" id="logout">Abmelden</button></div>`:'<p class="mut">Nicht angemeldet.</p>'}
 $('#backup').addEventListener('click',async ev=>{if(ev.target.id==='syncNow')sync();
  if(ev.target.id==='logout'){if(dirty())await sync();await sb.auth.signOut().catch(()=>{});try{localStorage.removeItem(LS);localStorage.removeItem(LD);localStorage.removeItem(LG);localStorage.removeItem(LGT)}catch(e){}GA=[];gaLast=0;setDirty(false);S=norm(null);D=mkDraft('push');renderAll()}});

@@ -2,6 +2,11 @@
 
 Neueste Einträge oben. Jeder tägliche Verbesserungs-Durchlauf ergänzt hier einen Abschnitt.
 
+## 2026-11-28 – Grundübungen bei eigenen Übungen, Sync-Fehler sichtbar
+- Neue eigene Übung im Plan kann als „Grundübung (schwer, mehrgelenkig)“ markiert werden: Steigerungs-Vorschlag +2,5 kg statt +1 kg und Pausen-Timer mit der langen Pause (A7). Bestehende eigene Übungen bleiben unverändert (Isolation)
+- Schlägt die Synchronisierung fehl, steht im Konto-Bereich „Synchronisierung fehlgeschlagen“ mit Uhrzeit und Grund (z. B. keine Verbindung, Anmeldung abgelaufen); die App versucht es automatisch erneut (15 s, 30 s, 1 min … höchstens alle 5 min) statt erst beim nächsten Öffnen (A4)
+- Service-Worker-Cache auf gymlog-v28
+
 ## 2026-11-28 – Pausen-Timer auch bei gesperrtem Handy
 - Beim Verlassen der App während einer Pause erscheint eine Mitteilung „Pause läuft – bis HH:MM:SS“ auf dem Sperrbildschirm
 - Pausen-Ende wird an Supabase gemeldet (Tabelle `rest_timers`); die Edge Function `water-reminder?rest=1` schickt eine Push-Mitteilung mit Ton genau zum Ende (pg_cron alle 10 s, ruft die Funktion nur auf, wenn ein Timer gleich endet)

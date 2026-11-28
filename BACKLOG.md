@@ -11,10 +11,11 @@ Regeln für die täglichen Durchläufe:
 - [x] A1 (erledigt 2026-11-26) Steigerungs-Vorschlag beim Eintragen: Hat man letztes Mal in allen Sätzen das obere Ende des Wdh.-Bereichs geschafft, in der vorhandenen „Letztes Mal“-Zeile „→ heute X kg probieren“ ergänzen (+2,5 kg Grundübungen, +1 kg Isolation).
 - [ ] A2 Automatische Tests (Puppeteer, headless Chrome): Speichern/Laden aller Eingaben, Training speichern, Statistik, Plan-Änderungen, Backup Export/Import.
 - [ ] A3 Update-Hinweis: Wenn der Service Worker eine neue Version findet, im vorhandenen Hinweis-Stil („msg“) „Neue Version – tippen zum Aktualisieren“ anzeigen.
-- [ ] A4 Robustheit: ~~Eingaben validieren (negative/absurde Werte)~~ (erledigt 2026-11-26), ~~Datum in der Zukunft~~ (erledigt 2026-11-27), offen: Fehler bei Sync sichtbar machen.
+- [x] A4 Robustheit: ~~Eingaben validieren (negative/absurde Werte)~~ (erledigt 2026-11-26), ~~Datum in der Zukunft~~ (erledigt 2026-11-27), ~~Fehler bei Sync sichtbar machen + automatisch erneut versuchen~~ (erledigt 2026-11-28).
 - [x] A6 (erledigt 2026-11-27) Steigerungs-Vorschlag auch in der Übersicht unter „Als Nächstes“ in der vorhandenen „Zuletzt:“-Zeile anzeigen.
 - [x] A8 (erledigt 2026-11-28) Pausen-Timer: Mitteilung aufs Handy, wenn die Pause vorbei ist und die App im Hintergrund/gesperrt ist (über die vorhandene Push-Berechtigung).
-- [ ] A7 Eigene Übungen als Grund- oder Isolationsübung markieren (bestimmt +2,5 kg bzw. +1 kg beim Steigerungs-Vorschlag; aktuell immer +1 kg).
+- [x] A7 (erledigt 2026-11-28) Eigene Übungen als Grundübung markieren (Schalter beim Anlegen im Plan): +2,5 kg Steigerung und lange Pause statt +1 kg / kurze Pause.
+- [ ] A10 Bereits angelegte eigene Übungen nachträglich als Grund-/Körpergewichtsübung umstellen können (braucht eine Bearbeiten-Möglichkeit im Plan → vermutlich B, vorher klären).
 - [ ] A9 Synchronisierung: Einstellungen/Plan feldweise zusammenführen statt „neuere Seite gewinnt alles“ (Wasser wird seit 2026-11-27 schon pro Tag zusammengeführt).
 - [ ] A5 Code in mehrere Dateien aufteilen (ohne Build-Schritt, ES-Module), Verhalten unverändert.
 
@@ -26,6 +27,8 @@ Regeln für die täglichen Durchläufe:
 - [ ] B5 Eiweiß-Zähler mit Schnell-Buttons für die Mealprep-Gerichte.
 - [ ] B7 Datum im Training sichtbarer: Steht ein anderes Datum als heute im Feld, darunter ein kleiner Hinweis „Nicht heute – richtig?“ mit Knopf „Heute“.
 - [ ] B6 Steigerungs-Vorschlag hervorheben: „→ heute 82,5 kg“ als kleines farbiges Etikett (Akzentfarbe) statt grauer Text, und auf Tippen das Gewicht in alle Sätze übernehmen.
+
+- [ ] B8 Sync-Warnung auf der Startseite: Wenn die Synchronisierung seit über 1 Stunde fehlschlägt, oben auf der Startseite ein kleiner Hinweis im vorhandenen „msg“-Stil „Nicht synchronisiert seit HH:MM – Daten sind auf dem Handy sicher“ mit Knopf „Erneut versuchen“ (aktuell steht der Fehler nur im Konto-Bereich und unten im Menü).
 
 ## Später – niedrige Priorität (Prio 5, NICHT selbst umsetzen)
 Diese Punkte erst angehen, wenn alle A-Punkte erledigt und alle B-Vorschläge umgesetzt oder von Livio abgelehnt sind.
