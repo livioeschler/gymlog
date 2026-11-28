@@ -123,6 +123,26 @@ Deno.serve(async (req) => {
   const now = berlinNow();
 
   const db = createClient(SB_URL, SB_KEY, { auth: { persistSession: false } });
+
+  // Pausen-Timer: wird alle 10 Sekunden aufgerufen, sobald ein Timer in den nächsten 10 Sekunden endet
+  if (new URL(req.url).searchParams.get("rest") === "1") {
+    const soon = new Date(Date.now() + 10_000).toISOString();
+    const { data: due, error: e0 } = await db.from("rest_timers").update({ sent: true })
+      .eq("sent", false).lte("end_at", soon).select("user_id,end_at,label");
+    if (e0) return Response.json({ error: e0.message }, { status: 500 });
+    let sentRest = 0;
+    await Promise.all((due ?? []).map(async (t) => {
+      const wait = Date.parse(t.end_at) - Date.now();
+      if (wait > 0) await new Promise((r) => setTimeout(r, Math.min(wait, 12_000)));
+      const { data: subs } = await db.from("push_subs").select("endpoint,sub").eq("user_id", t.user_id);
+      const msg = JSON.stringify({ title: "Pause vorbei", body: t.label || "Weiter geht's – nächster Satz!", tag: "rest", url: "./#training" });
+      for (const s of subs ?? []) {
+        try { await webpush.sendNotification(s.sub, msg, { TTL: 120, urgency: "high" }); sentRest++; }
+        catch (e) { const c = (e as { statusCode?: number }).statusCode; if (c === 404 || c === 410) await db.from("push_subs").delete().eq("endpoint", s.endpoint); }
+      }
+    }));
+    return Response.json({ rest: due?.length ?? 0, sent: sentRest });
+  }
   const { data: subs, error } = await db.from("push_subs").select("endpoint,user_id,sub");
   if (error) return Response.json({ error: error.message }, { status: 500 });
   if (!subs?.length) return Response.json({ time: `${now.h}:${now.mi}`, sent: 0, note: "keine Abos" });

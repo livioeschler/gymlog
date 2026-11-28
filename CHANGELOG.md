@@ -2,6 +2,11 @@
 
 Neueste Einträge oben. Jeder tägliche Verbesserungs-Durchlauf ergänzt hier einen Abschnitt.
 
+## 2026-11-28 – Pausen-Timer auch bei gesperrtem Handy
+- Beim Verlassen der App während einer Pause erscheint eine Mitteilung „Pause läuft – bis HH:MM:SS“ auf dem Sperrbildschirm
+- Pausen-Ende wird an Supabase gemeldet (Tabelle `rest_timers`); die Edge Function `water-reminder?rest=1` schickt eine Push-Mitteilung mit Ton genau zum Ende (pg_cron alle 10 s, ruft die Funktion nur auf, wenn ein Timer gleich endet)
+- Setup: supabase/setup-rest-timer.sql + Funktion neu deployen
+
 ## 2026-11-28 – App startet auf der Startseite
 - Ältere Installationen hatten noch die Statistik als Start-Adresse gespeichert; beim Öffnen wird jetzt immer die Startseite gezeigt
 

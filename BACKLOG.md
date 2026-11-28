@@ -13,7 +13,7 @@ Regeln für die täglichen Durchläufe:
 - [ ] A3 Update-Hinweis: Wenn der Service Worker eine neue Version findet, im vorhandenen Hinweis-Stil („msg“) „Neue Version – tippen zum Aktualisieren“ anzeigen.
 - [ ] A4 Robustheit: ~~Eingaben validieren (negative/absurde Werte)~~ (erledigt 2026-11-26), ~~Datum in der Zukunft~~ (erledigt 2026-11-27), offen: Fehler bei Sync sichtbar machen.
 - [x] A6 (erledigt 2026-11-27) Steigerungs-Vorschlag auch in der Übersicht unter „Als Nächstes“ in der vorhandenen „Zuletzt:“-Zeile anzeigen.
-- [ ] A8 Pausen-Timer: Mitteilung aufs Handy, wenn die Pause vorbei ist und die App im Hintergrund/gesperrt ist (über die vorhandene Push-Berechtigung).
+- [x] A8 (erledigt 2026-11-28) Pausen-Timer: Mitteilung aufs Handy, wenn die Pause vorbei ist und die App im Hintergrund/gesperrt ist (über die vorhandene Push-Berechtigung).
 - [ ] A7 Eigene Übungen als Grund- oder Isolationsübung markieren (bestimmt +2,5 kg bzw. +1 kg beim Steigerungs-Vorschlag; aktuell immer +1 kg).
 - [ ] A9 Synchronisierung: Einstellungen/Plan feldweise zusammenführen statt „neuere Seite gewinnt alles“ (Wasser wird seit 2026-11-27 schon pro Tag zusammengeführt).
 - [ ] A5 Code in mehrere Dateien aufteilen (ohne Build-Schritt, ES-Module), Verhalten unverändert.

@@ -263,7 +263,18 @@ function nextKg(id,l,t){if(!l||!l.s.length)return null;const p=planRow(id,t);if(
 /* Pausen-Timer: startet nach jedem eingetragenen Satz, läuft über absolute Endzeit (übersteht Neuladen/Hintergrund) */
 const LR='gymlog-rest';let R=null,rTick=null,aCtx=null;try{R=JSON.parse(localStorage.getItem(LR))}catch(e){}
 const mmss=sec=>`${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}`;
-const saveRest=()=>{try{R?localStorage.setItem(LR,JSON.stringify(R)):localStorage.removeItem(LR)}catch(e){}};
+const saveRest=()=>{try{R?localStorage.setItem(LR,JSON.stringify(R)):localStorage.removeItem(LR)}catch(e){}clearTimeout(restSyncT);restSyncT=setTimeout(restSync,300)};
+/* Pausen-Ende auch bei gesperrtem Handy: Ende an Supabase melden, die Edge Function schickt dann eine Push-Mitteilung */
+let restSyncT=null,restSent='';
+async function restSync(){if(typeof sb==='undefined'||!sb||!user||!navigator.onLine)return;
+ const want=R&&!R.done?`${R.end}|${R.label}`:'';if(want===restSent)return;restSent=want;
+ try{if(want){const {error}=await sb.from('rest_timers').upsert({user_id:user.id,end_at:new Date(R.end).toISOString(),label:R.label.replace(/^Pause · danach: /,'Weiter: ').replace(/^Pause · /,''),sent:false});if(error)throw error}
+  else await sb.from('rest_timers').delete().eq('user_id',user.id)}catch(e){restSent='?';console.warn('rest',e)}}
+async function restNote(show){try{if(!('serviceWorker' in navigator)||Notification.permission!=='granted')return;const reg=await navigator.serviceWorker.ready;
+ for(const n of await reg.getNotifications({tag:'rest'}))n.close();
+ if(show&&R&&!R.done){const t=new Date(R.end).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  await reg.showNotification('Pause läuft',{body:`Bis ${t} Uhr · ${R.label.replace(/^Pause · /,'')}`,tag:'rest',silent:true,icon:'icon-192.png',badge:'icon-192.png',data:{url:'./#training'}})}}catch(e){}}
+document.addEventListener('visibilitychange',()=>restNote(document.visibilityState==='hidden'));
 function beep(){try{aCtx=aCtx||new(window.AudioContext||window.webkitAudioContext)();const t0=aCtx.currentTime;for(const d of[0,.35]){const o=aCtx.createOscillator(),g=aCtx.createGain();o.frequency.value=880;g.gain.setValueAtTime(.0001,t0+d);g.gain.exponentialRampToValueAtTime(.25,t0+d+.02);g.gain.exponentialRampToValueAtTime(.0001,t0+d+.25);o.connect(g).connect(aCtx.destination);o.start(t0+d);o.stop(t0+d+.3)}}catch(e){}}
 function restAfter(i,j){const e=D.ex[i];if(!e)return;const sec=Math.round(num(BIG.has(e.id)?S.settings.restBig:S.settings.restIso));if(!(sec>0))return;
  let label;if(j+1<e.sets.length)label=`Pause · danach: ${exName(e.id)}, Satz ${j+2}`;else{const n=D.ex[i+1];label=n?`Pause · danach: ${exName(n.id)}`:'Pause · letzter Satz geschafft'}
